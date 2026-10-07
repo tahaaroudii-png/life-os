@@ -1,0 +1,16 @@
+# Les deux variables ci-dessous ne sont pas des secrets : la clé publishable
+# est conçue pour vivre dans le navigateur, elle finit de toute façon dans le
+# bundle. Ce qui protège les données, c'est la RLS côté Supabase.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  VITE_SUPABASE_URL = "https://zeaqumxcpjvyavzrydmm.supabase.co"
+  VITE_SUPABASE_ANON_KEY = "sb_publishable_OMSI56Gc78L_sfTdA0KWSw__aWo-JSU"
+  NODE_VERSION = "22"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
