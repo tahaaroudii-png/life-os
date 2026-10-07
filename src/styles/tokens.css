@@ -1,0 +1,42 @@
+/* Mode sombre par défaut. Une teinte par domaine, les mêmes que l'ancienne
+   app : elles ont été vérifiées pour le daltonisme et il n'y a aucune
+   raison de les perdre. */
+:root {
+  color-scheme: dark;
+
+  --bg:            #0b0f14;
+  --surface:       #121820;
+  --surface-2:     #1a222d;
+  --border:        #263141;
+  --text:          #e8eef6;
+  --text-2:        #93a3b8;
+  --text-3:        #64748b;
+
+  --accent:        #3b82f6;
+  --good:          #22c55e;
+  --warn:          #f59e0b;
+  --crit:          #ef4444;
+
+  --dom-spiritual: #0fa894;
+  --dom-body:      #d4742c;
+  --dom-business:  #8b7cf0;
+  --dom-personal:  #ce5794;
+  --dom-work:      #60a5fa;
+
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px;
+  --sp-4: 16px; --sp-5: 24px; --sp-6: 32px;
+
+  --nav-h: 64px;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    color-scheme: light;
+    --bg: #f8fafc; --surface: #ffffff; --surface-2: #f1f5f9;
+    --border: #e2e8f0; --text: #0f172a; --text-2: #475569; --text-3: #94a3b8;
+  }
+}

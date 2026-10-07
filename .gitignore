@@ -1,0 +1,9 @@
+node_modules/
+dist/
+dist-single/
+_unreviewed/
+*.tsbuildinfo
+.env
+.env.production
+probe*.mjs
+*.zip
