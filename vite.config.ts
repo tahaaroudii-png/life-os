@@ -11,7 +11,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon.svg', 'icon-192.png', 'icon-512.png'],
       manifest: {
         name: 'Life OS',
         short_name: 'Life OS',
@@ -21,15 +21,21 @@ export default defineConfig({
         display: 'standalone',
         start_url: base,
         scope: base,
-        icons: [{ src: 'favicon.svg', sizes: 'any', type: 'image/svg+xml' }],
+        lang: 'fr',
+        icons: [
+          { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: 'favicon.svg', sizes: 'any', type: 'image/svg+xml' },
+        ],
       },
       workbox: {
         // Les écrans se chargent hors ligne ; les données viennent du cache
         // React Query puis de la file d'attente. Rien de Supabase n'est mis
         // en cache ici : une réponse d'API périmée servie comme fraîche est
         // pire qu'une absence de réponse.
-        globPatterns: ['**/*.{js,css,html,svg,woff2}'],
-        navigateFallback: 'index.html',
+        globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        navigateFallback: base + 'index.html',
       },
     }),
   ],
