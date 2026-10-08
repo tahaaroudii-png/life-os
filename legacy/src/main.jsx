@@ -11,7 +11,9 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 30_000,
-      refetchOnWindowFocus: false,
+      // Saisir sur le téléphone puis revenir sur le PC doit suffire à voir
+      // le changement. Realtime est coupé, le focus est donc le seul signal.
+      refetchOnWindowFocus: true,
     },
   },
 })

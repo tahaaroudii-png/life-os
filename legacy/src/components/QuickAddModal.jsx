@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ENVELOPES } from '../lib/schema'
-import { loanNote } from '../lib/budget'
+import { loanNote, depositNote } from '../lib/budget'
 import { useTransactions } from '../hooks/useTransactions'
 
 /**
@@ -15,6 +15,13 @@ const TYPES = [
   { key: 'loan',    label: '⟲ Prêt',     color: 'var(--state-warn, #d97706)' },
 ]
 
+/** Accepte « 20 000 », « 20,5 », « 20.5 ». Renvoie NaN si rien d'exploitable. */
+export function parseAmount(raw) {
+  if (typeof raw !== 'string') return Number(raw)
+  const cleaned = raw.replace(/[\s\u00a0\u202f]/g, '').replace(',', '.')
+  return parseFloat(cleaned)
+}
+
 export default function QuickAddModal({ open, onClose, defaultEnvelope }) {
   const { addTransaction } = useTransactions()
   const [amount, setAmount] = useState('')
@@ -28,13 +35,20 @@ export default function QuickAddModal({ open, onClose, defaultEnvelope }) {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    const numAmount = parseFloat(amount)
+    // « 20 000 » et « 20,5 » sont des montants valides pour qui écrit en
+    // français. parseFloat s'arrête à la première espace ou virgule et
+    // transformait 20 000 en 20 : le gros montant disparaissait en silence.
+    const numAmount = parseAmount(amount)
     if (!numAmount || numAmount <= 0) return
 
     setSubmitting(true)
     // Signe et note selon le type
     const signedAmount = type === 'income' ? -Math.abs(numAmount) : Math.abs(numAmount)
-    const finalNote = type === 'loan' ? loanNote(note) : note
+    let finalNote = note
+    if (type === 'loan') finalNote = loanNote(note)
+    // Un versement sur le fond d'urgence est nommé : sans cela, impossible
+    // de distinguer plus tard un apport d'un retrait annulé.
+    else if (type === 'income' && envelope === 'urgence') finalNote = depositNote(note)
 
     const result = await addTransaction.mutateAsync({
       amount: signedAmount, envelope, note: finalNote,
@@ -74,7 +88,7 @@ export default function QuickAddModal({ open, onClose, defaultEnvelope }) {
 
           <label htmlFor="qa-amount">Montant (DH)</label>
           <input
-            id="qa-amount" type="number" inputMode="decimal" step="0.01" min="0"
+            id="qa-amount" type="text" inputMode="decimal"
             required autoFocus placeholder="0"
             value={amount} onChange={(e) => setAmount(e.target.value)}
             className="input-amount"

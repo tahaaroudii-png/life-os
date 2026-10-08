@@ -91,6 +91,26 @@ export default function Home() {
               : '—'}
           </span>
         </div>
+
+        {/* D'où sort ce total. Un solde sans sa composition ne se vérifie
+            pas : quand il paraît faux, on ne sait pas quoi corriger. */}
+        <ul className="emergency-card__breakdown">
+          <li>
+            <span>Mis de côté automatiquement</span>
+            <span>{formatDH(emergency.totalAllocated)}</span>
+          </li>
+          <li>
+            <span>Versements</span>
+            <span>{emergency.totalDeposited > 0 ? `+ ${formatDH(emergency.totalDeposited)}` : '—'}</span>
+          </li>
+          <li>
+            <span>Retraits</span>
+            <span>{emergency.totalSpent > 0 ? `− ${formatDH(emergency.totalSpent)}` : '—'}</span>
+          </li>
+        </ul>
+        <p className="emergency-card__hint">
+          Pour y verser une somme : « + Ajout » sur l’enveloppe Fond d’urgence.
+        </p>
       </div>
     </div>
   )

@@ -18,7 +18,6 @@ import AxisRing from '../../components/planning/AxisRing'
 import StreakBoard from '../../components/planning/StreakBoard'
 import PostponeSheet from '../../components/planning/PostponeSheet'
 import TimeEditSheet from '../../components/planning/TimeEditSheet'
-import GoalsStrip from '../../components/planning/GoalsStrip'
 
 // Fenêtre de fetch pour calculer les streaks (120 j en arrière) — largement
 // de quoi calculer les paliers Or / Diamant sans requête supplémentaire.
@@ -186,7 +185,6 @@ export default function Aujourdhui() {
 
   return (
     <div className="page-aujourdhui">
-      <GoalsStrip />
 
       <header className="today-header">
         <div className="today-header__intro">

@@ -53,84 +53,76 @@ export default function GoalsHome() {
   const ca = g50k ? metricCurrent(g50k, ecomState) : 0
   const caTarget = g50k?.target || 50000
   const netMonth = g10k ? metricCurrent(g10k, ecomState) : 0
+
+  // Les seules données que la page affiche désormais.
+  const rows = state.goals
+    .map((g) => ({ g, p: annualProgress(g, deadline, ecomState) }))
+    .filter((r) => r.p)
   const gates10k = g10k ? evalGates(g10k, ecomState) : []
   const openCount = gates10k.filter((r) => r.open).length
 
   return (
     <div className="dash">
-      {/* 1. Barre de titre */}
       <header className="dash-header">
         <h1>Objectifs 2026</h1>
-        <span className="dash-date">{formatDateFr(today)}</span>
+        <span className="dash-date">{daysLeft} jours restants</span>
       </header>
 
-      {/* 2. Cinq compteurs en ligne */}
-      <section className="kpi-row">
-        <Kpi
-          value={daysLeft} unit="j" label="Restant"
-          hint={`Jusqu'au ${deadline}`}
-        />
-        <Kpi
-          value={formatMoney(ca, 'USD')}
-          label="CA 2026"
-          hint={`${((ca / caTarget) * 100).toFixed(1)} % de ${formatMoney(caTarget, 'USD')}`}
-        />
-        <Kpi
-          value={formatMoney(netMonth, 'USD')}
-          label="Profit/mois"
-          hint={`Cible ${formatMoney(g10k?.target || 10000, 'USD')}`}
-        />
-        <Kpi
-          value={openCount} unit={`/${gates10k.length}`}
-          label="Verrous ouverts" hint="Objectif ④"
-        />
-        <Kpi
-          value={actionsDoneToday} unit={`/${clickableActions}`}
-          label="Aujourd'hui" hint="Actions faites"
-        />
-      </section>
+      {/* Une ligne par objectif, et rien de plus.
+          Les compteurs, graphiques, verrous et contributions restaient
+          empilés sans qu'on puisse rien y lire : ils sont retirés de la vue.
+          Leur code est intact, on les remettra un par un s'ils servent. */}
+      <ul className="goal-list">
+        {rows.map(({ g, p }) => {
+          const dom = DOMAINS[g.domain]
+          const color = dom?.light || 'var(--accent, #2563eb)'
+          const pct = Math.round(p.pct * 100)
+          const proj = p.projectedPct == null ? null : Math.round(p.projectedPct * 100)
+          return (
+            <li key={g.id} className="goal-line">
+              <div className="goal-line__head">
+                <span className="goal-line__name">
+                  <i className="goal-line__dot" style={{ background: color }} />
+                  {g.labelAr || g.label}
+                </span>
+                <span className="goal-line__pct">{pct} %</span>
+              </div>
 
-      {/* 3. Actions du jour en pastilles */}
-      <ActionsRow state={state} goalById={goalById} goals={goals} />
+              {/* Trois positions sur la même règle : où tu es, où tu devrais
+                  être aujourd'hui, où tu finiras si rien ne change. */}
+              <div className="goal-line__track">
+                {proj != null && proj > pct && (
+                  <span className="goal-line__proj"
+                        style={{ left: `${pct}%`, width: `${Math.min(100 - pct, proj - pct)}%`, background: color }} />
+                )}
+                <span className="goal-line__real" style={{ width: `${pct}%`, background: color }} />
+                {p.expectedPct != null && (
+                  <span className="goal-line__tick"
+                        style={{ left: `${Math.round(p.expectedPct * 100)}%` }} />
+                )}
+              </div>
 
-      {/* 4. Grille de tuiles */}
-      <section className="tiles">
-        {state.goals.map((g) => (
-          <GoalTile
-            key={g.id}
-            goal={g}
-            ecomState={ecomState}
-            deadline={deadline}
-            active={filterGoalId === g.id}
-            onClick={() => setFilterGoalId((cur) => cur === g.id ? null : g.id)}
-          />
-        ))}
-      </section>
+              <div className="goal-line__foot">
+                <span>{p.label}</span>
+                <span className={`goal-line__verdict tone-${p.tone}`}>{VERDICT[p.tone]}</span>
+              </div>
+            </li>
+          )
+        })}
+      </ul>
 
-      {/* 4b. Progression annuelle — alimentée automatiquement par les tâches Planning */}
-      <AnnualPanel state={state} ecomState={ecomState} deadline={deadline} />
-
-      {/* 5. Deux graphiques */}
-      <section className="charts">
-        <ChartTrajectory ecomState={ecomState} target={caTarget} year={today.slice(0, 4)} />
-        <ChartWeeklyEffort state={state} ecomState={ecomState} />
-      </section>
-
-      {/* 6. Verrous ④ compacts */}
-      {g10k && <GatesStrip goal={g10k} gates={gates10k} onToggleManual={goals.setGateManual} />}
-
-      {/* 7. Contributions */}
-      <ContribList
-        contributions={contributions}
-        filterGoalId={filterGoalId}
-        onClear={() => setFilterGoalId(null)}
-        goalById={goalById}
-      />
-
-      {/* 8. Liaisons Planning — associer les tâches existantes aux objectifs */}
-      <LiaisonsPanel state={state} goals={goals} />
+      {rows.length === 0 && (
+        <p className="muted">Aucun objectif mesurable pour l’instant.</p>
+      )}
     </div>
   )
+}
+
+/** Le mot qui remplace le pourcentage dans la tête de celui qui lit. */
+const VERDICT = {
+  good: 'À l’heure',
+  warn: 'À rattraper',
+  crit: 'Hors d’atteinte',
 }
 
 // ----------------------------------------------------------------------

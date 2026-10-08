@@ -8,6 +8,33 @@ import { ENVELOPES, TX_COLS } from './schema'
  */
 export const LOAN_PREFIX = '[PRÊT] '
 
+/**
+ * Préfixe qui marque une transaction du fond d'urgence comme un APPORT et
+ * non une dépense.
+ *
+ * Le fond était jusqu'ici une pure formule — mois écoulés × allocation
+ * mensuelle, moins les retraits. Rien ne permettait d'y verser une somme :
+ * une prime, un virement d'épargne, un mois où l'on met plus de côté
+ * restaient invisibles, et le total ne bougeait qu'au changement de mois.
+ * Un apport est donc une transaction 'urgence' comptée en positif.
+ */
+export const DEPOSIT_PREFIX = '[APPORT] '
+
+export function isDeposit(tx) {
+  return typeof tx?.note === 'string' && tx.note.startsWith(DEPOSIT_PREFIX)
+}
+
+export function depositNote(userNote) {
+  const clean = (userNote || '').trim()
+  return `${DEPOSIT_PREFIX}${clean}`.trim()
+}
+
+/** Le libellé sans son préfixe technique, pour l'affichage. */
+export function cleanNote(note) {
+  if (typeof note !== 'string') return ''
+  return note.replace(DEPOSIT_PREFIX, '').replace(LOAN_PREFIX, '').trim()
+}
+
 export function isLoan(tx) {
   return typeof tx?.note === 'string' && tx.note.startsWith(LOAN_PREFIX)
 }
@@ -102,9 +129,16 @@ export function computeEmergencyFundState(settings, allUrgenceTransactions, now 
 
   const monthsElapsed = monthsBetweenInclusive(start, now)
   const totalAllocated = monthsElapsed * monthlyAllocation
-  const totalSpent = allUrgenceTransactions.reduce((sum, tx) => sum + Number(tx.amount || 0), 0)
 
-  const cumulated = Math.max(0, totalAllocated - totalSpent)
+  let totalDeposited = 0
+  let totalSpent = 0
+  for (const tx of allUrgenceTransactions) {
+    const amount = Number(tx.amount || 0)
+    if (isDeposit(tx)) totalDeposited += amount
+    else totalSpent += amount
+  }
+
+  const cumulated = Math.max(0, totalAllocated + totalDeposited - totalSpent)
   const percent = goal > 0 ? Math.min(100, (cumulated / goal) * 100) : 0
 
   let monthsRemaining = null
@@ -114,7 +148,10 @@ export function computeEmergencyFundState(settings, allUrgenceTransactions, now 
     monthsRemaining = 0
   }
 
-  return { cumulated, goal, percent, monthsRemaining, monthlyAllocation }
+  return {
+    cumulated, goal, percent, monthsRemaining, monthlyAllocation,
+    totalAllocated, totalDeposited, totalSpent,
+  }
 }
 
 /**
@@ -134,12 +171,17 @@ export function computeEmergencyFundHistory(settings, allUrgenceTransactions, mo
     const cursor = new Date(start.getFullYear(), start.getMonth() + m - 1, 1)
     const nextCursor = new Date(start.getFullYear(), start.getMonth() + m, 1)
     const allocatedSoFar = m * monthlyAllocation
-    const spentSoFar = allUrgenceTransactions
-      .filter((tx) => new Date(tx[TX_COLS.occurredAt]) < nextCursor)
-      .reduce((sum, tx) => sum + Number(tx.amount || 0), 0)
+    let depositedSoFar = 0
+    let spentSoFar = 0
+    for (const tx of allUrgenceTransactions) {
+      if (new Date(tx[TX_COLS.occurredAt]) >= nextCursor) continue
+      const amount = Number(tx.amount || 0)
+      if (isDeposit(tx)) depositedSoFar += amount
+      else spentSoFar += amount
+    }
     history.push({
       month: cursor,
-      cumulated: Math.max(0, allocatedSoFar - spentSoFar),
+      cumulated: Math.max(0, allocatedSoFar + depositedSoFar - spentSoFar),
     })
   }
   return history
