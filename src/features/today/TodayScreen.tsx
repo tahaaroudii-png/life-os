@@ -7,7 +7,7 @@ import { useStreaks } from '@/data/useGoals'
 import { useDayState } from '@/data/useDayState'
 import { useAdvice, useTodayFocus } from '@/data/useInsights'
 import { isExpectedOn } from '@/domain/cadence'
-import { Ring } from '@/ui/Ring'
+
 import { CloseDayModal } from './CloseDayModal'
 import type { Task, TaskLog } from '@/db/types'
 import type { LogStatus } from '@/domain/streak'
@@ -48,15 +48,6 @@ export function TodayScreen({ userId }: { userId: string }) {
     return isExpectedOn(t.cadence, day)
   }), [tasks, day, logByTask])
 
-  const byAxis = useMemo(() => axes.map((a) => ({
-    axis: a,
-    items: todays.filter((t) => t.axis_key === a.key).sort((x, y) => {
-      if (!!x.scheduled_time !== !!y.scheduled_time) return x.scheduled_time ? -1 : 1
-      if (x.scheduled_time && y.scheduled_time) return x.scheduled_time.localeCompare(y.scheduled_time)
-      return x.created_at.localeCompare(y.created_at)
-    }),
-  })).filter((g) => g.items.length > 0), [axes, todays])
-
   const doneCount = todays.filter((t) => logByTask.get(t.id)?.status === 'done').length
   const openTasks = todays.filter((t) => (logByTask.get(t.id)?.status ?? 'pending') === 'pending')
   const closed = !!dayState?.closed_at
@@ -65,6 +56,22 @@ export function TodayScreen({ userId }: { userId: string }) {
     const current = logByTask.get(task.id)?.status ?? 'pending'
     setStatus.mutate({ task_id: task.id, log_date: day, status: NEXT[current] ?? 'done' })
   }
+
+  const axisByKey = useMemo(() => new Map(axes.map((a) => [a.key, a])), [axes])
+
+  /* Un seul fil, trié par heure. Les tâches sans heure ferment la marche :
+     elles n'ont pas de place dans l'horaire, elles se font quand ça vient. */
+  const ordered = useMemo(() => [...todays].sort((x, y) => {
+    if (!!x.scheduled_time !== !!y.scheduled_time) return x.scheduled_time ? -1 : 1
+    if (x.scheduled_time && y.scheduled_time) return x.scheduled_time.localeCompare(y.scheduled_time)
+    return x.title.localeCompare(y.title)
+  }), [todays])
+
+  const now = new Date()
+  const nowMin = now.getHours() * 60 + now.getMinutes()
+  const nowLabel = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+  /* L'index devant lequel poser la ligne : la première tâche encore à venir. */
+  const nowAt = ordered.findIndex((t) => t.scheduled_time && toMinutes(t.scheduled_time) > nowMin)
 
   return (
     <div className="app">
@@ -80,6 +87,21 @@ export function TodayScreen({ userId }: { userId: string }) {
         </div>
       )}
 
+      <section className="daybar">
+        <div className="daybar-top">
+          <span className="daybar-count">{doneCount}<span> / {todays.length}</span></span>
+          <span className="small muted">{closed ? 'Journée close' : `${openTasks.length} en attente`}</span>
+        </div>
+        <div className="daybar-track">
+          {ordered.map((t) => {
+            const st = logByTask.get(t.id)?.status ?? 'pending'
+            const color = axisByKey.get(t.axis_key)?.color ?? 'var(--accent)'
+            return <i key={t.id} className="daybar-seg" data-on={st === 'done' ? 1 : 0}
+                      style={{ ['--seg' as string]: color }} />
+          })}
+        </div>
+      </section>
+
       {focus.length > 0 && (
         <section className="focus">
           <h3>Les trois qui comptent</h3>
@@ -93,59 +115,56 @@ export function TodayScreen({ userId }: { userId: string }) {
         </section>
       )}
 
-      <div className="rings">
-        {byAxis.map(({ axis, items }) => {
-          const done = items.filter((t) => logByTask.get(t.id)?.status === 'done').length
-          return (
-            <Ring key={axis.key} ratio={items.length ? done / items.length : 0}
-                  color={axis.color} label={axis.label}
-                  caption={`${axis.label} — ${done} sur ${items.length}`} />
-          )
-        })}
-      </div>
-
-      <p className="small muted" style={{ marginTop: 0 }}>
-        {doneCount} sur {todays.length} fait{doneCount > 1 ? 's' : ''}.
-        {closed && ' Journée close.'}
-      </p>
-
-      {byAxis.length === 0 && (
+      {ordered.length === 0 ? (
         <div className="empty">
-          <p>Aucune tâche pour aujourd’hui.</p>
-          <p className="small">Crée tes habitudes dans Plus → Tâches.</p>
+          <p>Rien à l’horaire aujourd’hui.</p>
+          <p className="small">Ajoute tes habitudes dans Plus → Tâches.</p>
         </div>
-      )}
-
-      {byAxis.map(({ axis, items }) => (
-        <section className="axis-group" key={axis.key}>
-          <header>
-            <span className="axis-dot" style={{ background: axis.color }} />
-            <h3>{axis.label}</h3>
-          </header>
-          {items.map((task) => {
+      ) : (
+        <div className="timetable">
+          {ordered.map((task, i) => {
             const status = (logByTask.get(task.id)?.status ?? 'pending') as LogStatus
             const streak = streakByTask.get(task.id)
+            const axis = axisByKey.get(task.axis_key)
+            const color = axis?.color ?? 'var(--text-3)'
             return (
-              <div key={task.id} className={`task ${status === 'done' ? 'is-done' : ''}`}>
-                <button className="check" data-status={status} onClick={() => cycle(task)}
-                        aria-label={`${task.title} — ${status}`}>
-                  {GLYPH[status]}
-                </button>
-                <div className="body">
-                  <div className="title">{task.title_ar ?? task.title}</div>
-                  <div className="meta">
-                    {task.scheduled_time && <span>{formatTime(task.scheduled_time)}</span>}
-                    {task.cadence.type === 'weekly' && <span>{task.cadence.times}×/semaine</span>}
+              <div key={task.id}>
+                {i === nowAt && (
+                  <div className="tt-now" aria-hidden="true">
+                    <span className="tt-now-time">{nowLabel}</span>
+                    <span className="tt-now-rule" />
                   </div>
-                </div>
-                {!!streak?.streak && (
-                  <span className="streak">{streak.streak} {streak.streak_unit === 'semaines' ? 'sem' : 'j'}</span>
                 )}
+                <div className="tt-row" data-done={status === 'done' ? 1 : 0}
+                     style={{ ['--axis' as string]: color }}>
+                  <span className={`tt-time ${task.scheduled_time ? '' : 'is-unset'}`}>
+                    {task.scheduled_time ? formatTime(task.scheduled_time) : '—'}
+                  </span>
+                  <span className="tt-axis" />
+                  <div className="tt-main">
+                    <button className="tt-check" data-status={status} onClick={() => cycle(task)}
+                            aria-label={`${task.title} — ${status}`}>
+                      {GLYPH[status]}
+                    </button>
+                    <div style={{ minWidth: 0 }}>
+                      <div className="tt-title">{task.title_ar ?? task.title}</div>
+                      <div className="tt-sub">
+                        {axis?.label}
+                        {task.cadence.type === 'weekly' && ` · ${task.cadence.times}×/semaine`}
+                      </div>
+                    </div>
+                  </div>
+                  {!!streak?.streak && (
+                    <span className="tt-streak">
+                      {streak.streak} {streak.streak_unit === 'semaines' ? 'sem' : 'j'}
+                    </span>
+                  )}
+                </div>
               </div>
             )
           })}
-        </section>
-      ))}
+        </div>
+      )}
 
       {!closed && todays.length > 0 && (
         <button className="btn primary wide" onClick={() => setClosing(true)}>
@@ -159,6 +178,11 @@ export function TodayScreen({ userId }: { userId: string }) {
       )}
     </div>
   )
+}
+
+function toMinutes(t: string): number {
+  const [h, m] = t.split(':')
+  return Number(h) * 60 + Number(m)
 }
 
 function adviceLabel(kind: string): string {

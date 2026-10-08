@@ -1,42 +1,81 @@
-/* Mode sombre par défaut. Une teinte par domaine, les mêmes que l'ancienne
-   app : elles ont été vérifiées pour le daltonisme et il n'y a aucune
-   raison de les perdre. */
+/* ---------------------------------------------------------------------
+   Direction : la gare avant le jour.
+
+   Tahar est ingénieur à l'ONCF. Sa journée commence à 04:50, dans le noir,
+   et chacune de ses tâches porte une heure. Un horaire, donc — pas un
+   tableau de bord. Le vocabulaire est celui du rail : une position réelle
+   comparée à une position prévue, et trois signaux pour dire l'écart.
+
+   Les couleurs par domaine viennent de l'ancienne app. Elles ont été
+   éprouvées pour le daltonisme ; on les garde, on les assombrit juste ce
+   qu'il faut pour tenir sur un fond nuit.
+   --------------------------------------------------------------------- */
+
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap');
+
 :root {
   color-scheme: dark;
 
-  --bg:            #0b0f14;
-  --surface:       #121820;
-  --surface-2:     #1a222d;
-  --border:        #263141;
-  --text:          #e8eef6;
-  --text-2:        #93a3b8;
-  --text-3:        #64748b;
+  /* Le bleu d'avant l'aube, pas un gris teinté. */
+  --bg:            #0a0e17;
+  --surface:       #111927;
+  --surface-2:     #182133;
+  --border:        #1f2b3e;
+  --border-strong: #2d3d55;
+  --text:          #e6ebf3;
+  --text-2:        #8e9fb8;
+  --text-3:        #5d6e87;
 
-  --accent:        #3b82f6;
-  --good:          #22c55e;
-  --warn:          #f59e0b;
-  --crit:          #ef4444;
+  --accent:        #5b8ff9;
+  --accent-soft:   #5b8ff922;
 
-  --dom-spiritual: #0fa894;
-  --dom-body:      #d4742c;
-  --dom-business:  #8b7cf0;
-  --dom-personal:  #ce5794;
-  --dom-work:      #60a5fa;
+  /* Trois signaux. À l'heure, en retard, hors d'atteinte. */
+  --good:          #4fbf95;
+  --warn:          #e3a13f;
+  --crit:          #dc5b70;
 
-  --r-sm: 8px;
-  --r-md: 12px;
-  --r-lg: 16px;
+  --dom-spiritual: #2bb39d;
+  --dom-body:      #e0863a;
+  --dom-business:  #9385f5;
+  --dom-personal:  #e06aa5;
+  --dom-work:      #63a4fb;
+
+  --font:    'Archivo', ui-sans-serif, system-ui, sans-serif;
+  --font-ar: 'IBM Plex Sans Arabic', 'Archivo', sans-serif;
+
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
 
   --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px;
-  --sp-4: 16px; --sp-5: 24px; --sp-6: 32px;
+  --sp-4: 16px; --sp-5: 24px; --sp-6: 36px;
 
-  --nav-h: 64px;
+  --nav-h: 68px;
+  --gutter: 54px;   /* la colonne des heures */
 }
 
 @media (prefers-color-scheme: light) {
   :root:not([data-theme='dark']) {
     color-scheme: light;
-    --bg: #f8fafc; --surface: #ffffff; --surface-2: #f1f5f9;
-    --border: #e2e8f0; --text: #0f172a; --text-2: #475569; --text-3: #94a3b8;
+    --bg: #f6f7fa;
+    --surface: #ffffff;
+    --surface-2: #eef1f6;
+    --border: #e0e5ee;
+    --border-strong: #c6cfdd;
+    --text: #0d1420;
+    --text-2: #56637a;
+    --text-3: #8a95a8;
+    --accent: #2f6fe4;
+    --accent-soft: #2f6fe414;
+    --good: #19875c;
+    --warn: #a86a08;
+    --crit: #c0344a;
+    --dom-spiritual: #0c7f70;
+    --dom-body: #b25f18;
+    --dom-business: #6a58d6;
+    --dom-personal: #bc4381;
+    --dom-work: #2f6fe4;
   }
 }
+
+:root[data-theme='dark'] { color-scheme: dark; }
