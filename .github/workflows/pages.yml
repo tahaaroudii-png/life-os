@@ -26,17 +26,20 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm ci
-      - run: npm run build
-      # Pages ne connaît pas les redirections : une route profonde rechargée
-      # tombe sur 404. Servir l'app depuis 404.html rattrape le cas.
-      - run: cp dist/index.html dist/404.html
+
+      # C'est l'app que Tahar utilise au quotidien : elle occupe la racine.
+      - working-directory: legacy
+        run: npm install --no-audit --no-fund
+      - working-directory: legacy
+        run: npm run build
+      # Pages ne gère pas les redirections : une route rechargée tombe sur
+      # 404, que l'on sert avec l'app elle-même.
+      - run: cp legacy/dist/index.html legacy/dist/404.html
+
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: legacy/dist
 
   deploy:
     needs: build

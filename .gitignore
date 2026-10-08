@@ -8,3 +8,5 @@ _unreviewed/
 probe*.mjs
 *.zip
 *.log
+legacy/node_modules/
+legacy/dist/

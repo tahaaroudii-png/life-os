@@ -1,0 +1,123 @@
+/* -----------------------------------------------------------------
+ * Design tokens — hybride Streaks / Apple Fitness
+ * Typo Inter, blanc en clair, anthracite en sombre, accents saturés
+ * ----------------------------------------------------------------- */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&family=Amiri:wght@400;700&display=swap');
+
+:root {
+  /* Couleurs des domaines — mêmes hex qu'avant, gardées cohérentes */
+  --dom-spiritual: #00897B;
+  --dom-body:      #D2691E;
+  --dom-business:  #5B4BC4;
+  --dom-personal:  #C0357E;
+
+  /* États */
+  --state-good:  #10b981;
+  --state-warn:  #f59e0b;
+  --state-crit:  #ef4444;
+
+  /* Palette de fond & surface (mode clair) */
+  --ds-bg:        #ffffff;
+  --ds-bg-alt:    #fafafa;
+  --ds-card:      #ffffff;
+  --ds-card-alt:  #f5f6f8;
+  --ds-border:    #e5e7eb;
+  --ds-border-strong: #d1d5db;
+  --ds-line:      #edeef0;
+  --ds-text:      #111827;
+  --ds-text-soft: #4b5563;
+  --ds-muted:     #6b7280;
+  --ds-accent:    #6366f1;
+
+  /* Typographie */
+  --ds-ui:   'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --ds-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+  --ds-ar:   'Amiri', serif;
+
+  /* Rayons & ombres */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --r-xl: 24px;
+  --sh-1: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.05);
+  --sh-2: 0 4px 12px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.04);
+  --sh-3: 0 12px 32px rgba(15, 23, 42, 0.12);
+  --sh-glow: 0 0 0 4px color-mix(in srgb, var(--ds-accent) 20%, transparent);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --dom-spiritual: #14b8a6;
+    --dom-body:      #f97316;
+    --dom-business:  #a78bfa;
+    --dom-personal:  #ec4899;
+
+    --state-good:  #34d399;
+    --state-warn:  #fbbf24;
+    --state-crit:  #f87171;
+
+    --ds-bg:        #0a0a0d;
+    --ds-bg-alt:    #111114;
+    --ds-card:      #17171c;
+    --ds-card-alt:  #1e1e24;
+    --ds-border:    #2a2a33;
+    --ds-border-strong: #3a3a45;
+    --ds-line:      #26262e;
+    --ds-text:      #f9fafb;
+    --ds-text-soft: #d4d4d8;
+    --ds-muted:     #a1a1aa;
+    --ds-accent:    #a78bfa;
+
+    --sh-1: 0 1px 2px rgba(0, 0, 0, 0.5);
+    --sh-2: 0 4px 14px rgba(0, 0, 0, 0.5);
+    --sh-3: 0 16px 40px rgba(0, 0, 0, 0.6);
+  }
+}
+:root[data-theme='dark'] {
+  --dom-spiritual: #14b8a6;
+  --dom-body:      #f97316;
+  --dom-business:  #a78bfa;
+  --dom-personal:  #ec4899;
+  --state-good:  #34d399;
+  --state-warn:  #fbbf24;
+  --state-crit:  #f87171;
+  --ds-bg:        #0a0a0d;
+  --ds-bg-alt:    #111114;
+  --ds-card:      #17171c;
+  --ds-card-alt:  #1e1e24;
+  --ds-border:    #2a2a33;
+  --ds-border-strong: #3a3a45;
+  --ds-line:      #26262e;
+  --ds-text:      #f9fafb;
+  --ds-text-soft: #d4d4d8;
+  --ds-muted:     #a1a1aa;
+  --ds-accent:    #a78bfa;
+  --sh-1: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --sh-2: 0 4px 14px rgba(0, 0, 0, 0.5);
+  --sh-3: 0 16px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* Reset ciblé — sans casser le reste de l'app */
+html, body { background: var(--ds-bg); color: var(--ds-text); }
+body { font-family: var(--ds-ui); font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11'; }
+[lang="ar"], .arabic { font-family: var(--ds-ar); }
+
+/* Animations réutilisables */
+@keyframes ds-pulse {
+  0%   { transform: scale(1);   box-shadow: 0 0 0 0 currentColor; }
+  50%  { transform: scale(1.05); box-shadow: 0 0 0 8px transparent; }
+  100% { transform: scale(1);   box-shadow: 0 0 0 0 transparent; }
+}
+@keyframes ds-slide-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes ds-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
