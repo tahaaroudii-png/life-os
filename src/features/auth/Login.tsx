@@ -16,7 +16,12 @@ export function Login() {
   async function send(e: React.FormEvent) {
     e.preventDefault()
     setBusy(true); setError(null)
-    const { error } = await supabase.auth.signInWithOtp({ email })
+    // Sans redirection explicite, Supabase retombe sur son « Site URL » et
+    // le lien peut atterrir à la racine du domaine, où il n'y a rien.
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: new URL(import.meta.env.BASE_URL, location.origin).href },
+    })
     setBusy(false)
     if (error) setError(error.message); else setSent(true)
   }
@@ -27,7 +32,7 @@ export function Login() {
       <p className="muted small">Axes de vie, objectifs 2026, business et argent.</p>
       {sent ? (
         <div className="card" style={{ marginTop: 24 }}>
-          <p>Lien envoyé à <strong>{email}</strong>. Ouvre-le sur cet appareil.</p>
+          <p>Lien envoyé à <strong>{email}</strong>. Ouvre-le sur cet appareil — pas sur un autre.</p>
         </div>
       ) : (
         <form className="card" style={{ marginTop: 24 }} onSubmit={send}>
