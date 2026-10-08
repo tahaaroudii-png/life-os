@@ -54,6 +54,8 @@ export function SettingsScreen() {
     <div className="app">
       <header className="screen-head"><h1>Réglages</h1></header>
 
+      <PasswordSection />
+
       <section className="card">
         <h3>Amorçage</h3>
         <p className="small muted">
@@ -99,4 +101,48 @@ export function SettingsScreen() {
 function safeParse(raw: string | null): unknown {
   if (!raw) return null
   try { return JSON.parse(raw) } catch { return null }
+}
+
+/**
+ * Définir un mot de passe.
+ *
+ * Le lien par e-mail dépend d'un service d'envoi plafonné à deux messages
+ * par heure. Un mot de passe supprime cette dépendance : c'est le seul
+ * moyen d'être sûr de pouvoir entrer quand on en a besoin.
+ */
+function PasswordSection() {
+  const [pwd, setPwd] = useState('')
+  const [state, setState] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+
+  async function save() {
+    if (pwd.length < 8) { setState('Au moins 8 caractères.'); return }
+    setBusy(true); setState(null)
+    const { error } = await supabase.auth.updateUser({ password: pwd })
+    setBusy(false)
+    if (error) setState(`Échec : ${error.message}`)
+    else { setPwd(''); setState('Mot de passe enregistré. Tu peux maintenant entrer sans e-mail.') }
+  }
+
+  return (
+    <section className="card">
+      <h3>Mot de passe</h3>
+      <p className="small muted">
+        Définis-en un pour ne plus dépendre du lien par e-mail, qui est
+        plafonné à deux envois par heure.
+      </p>
+      <input type="password" value={pwd} autoComplete="new-password"
+             placeholder="Nouveau mot de passe"
+             onChange={(e) => setPwd(e.target.value)}
+             style={{
+               width: '100%', marginBottom: 12, padding: 12, borderRadius: 8,
+               border: '1px solid var(--border)', background: 'var(--surface-2)',
+               color: 'var(--text)', font: 'inherit',
+             }} />
+      <button className="btn" onClick={save} disabled={busy || !pwd}>
+        {busy ? 'Enregistrement…' : 'Enregistrer'}
+      </button>
+      {state && <p className="xs" style={{ marginTop: 8 }}>{state}</p>}
+    </section>
+  )
 }
