@@ -55,21 +55,51 @@ export function totalLoans(transactions, from, to) {
   }, 0)
 }
 
-/** Début (1er jour, 00:00 local) du mois contenant `date`. */
+/**
+ * Jour du mois où tombe le salaire, et donc où le budget repart à zéro.
+ *
+ * Le mois budgétaire ne coïncide pas avec le mois du calendrier : il court
+ * du 20 au 19. Une dépense du 25 octobre appartient à la période ouverte
+ * par le salaire du 20 octobre, pas au mois d'octobre.
+ *
+ * Les mois courts décalent la borne : s'il n'existe pas de 20 dans le mois
+ * visé (cas théorique ici, réel pour un jour ≥ 29), on prend le dernier
+ * jour disponible.
+ */
+export const SALARY_DAY = 20
+
+function clampToMonth(year, monthIndex, day) {
+  const lastDay = new Date(year, monthIndex + 1, 0).getDate()
+  return new Date(year, monthIndex, Math.min(day, lastDay), 0, 0, 0, 0)
+}
+
+/** Début de la période budgétaire contenant `date` — le SALARY_DAY courant. */
 export function startOfMonth(date = new Date()) {
-  return new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0, 0)
+  const d = new Date(date)
+  const anchor = clampToMonth(d.getFullYear(), d.getMonth(), SALARY_DAY)
+  // Avant le 20, on est encore dans la période ouverte le mois précédent.
+  if (d < anchor) return clampToMonth(d.getFullYear(), d.getMonth() - 1, SALARY_DAY)
+  return anchor
 }
 
-/** Début du mois suivant celui de `date`. */
+/** Début de la période budgétaire suivante. */
 export function startOfNextMonth(date = new Date()) {
-  return new Date(date.getFullYear(), date.getMonth() + 1, 1, 0, 0, 0, 0)
+  const start = startOfMonth(date)
+  return clampToMonth(start.getFullYear(), start.getMonth() + 1, SALARY_DAY)
 }
 
-/** Nombre de mois entre `start` (1er du mois) et `date` (1er du mois), bornes incluses. */
+/** Le mois civil que cette période couvre pour l'essentiel, pour l'étiqueter. */
+export function periodLabel(date = new Date()) {
+  const start = startOfMonth(date)
+  return new Date(start.getFullYear(), start.getMonth(), 1)
+}
+
+/** Nombre de périodes entre `start` et `date`, bornes incluses. */
 export function monthsBetweenInclusive(start, date = new Date()) {
-  const s = new Date(start)
+  const s = startOfMonth(start)
+  const d = startOfMonth(date)
   const months =
-    (date.getFullYear() - s.getFullYear()) * 12 + (date.getMonth() - s.getMonth()) + 1
+    (d.getFullYear() - s.getFullYear()) * 12 + (d.getMonth() - s.getMonth()) + 1
   return Math.max(1, months)
 }
 
@@ -168,8 +198,8 @@ export function computeEmergencyFundHistory(settings, allUrgenceTransactions, mo
 
   const history = []
   for (let m = firstShown; m <= totalMonths; m++) {
-    const cursor = new Date(start.getFullYear(), start.getMonth() + m - 1, 1)
-    const nextCursor = new Date(start.getFullYear(), start.getMonth() + m, 1)
+    const cursor = clampToMonth(start.getFullYear(), start.getMonth() + m - 1, SALARY_DAY)
+    const nextCursor = clampToMonth(start.getFullYear(), start.getMonth() + m, SALARY_DAY)
     const allocatedSoFar = m * monthlyAllocation
     let depositedSoFar = 0
     let spentSoFar = 0
@@ -194,11 +224,12 @@ export function computeEmergencyFundHistory(settings, allUrgenceTransactions, mo
 export function computeMonthlySeries(transactions, monthsToShow = 6, now = new Date()) {
   const months = []
   for (let i = monthsToShow - 1; i >= 0; i--) {
-    months.push(new Date(now.getFullYear(), now.getMonth() - i, 1))
+    const anchor = startOfMonth(now)
+    months.push(clampToMonth(anchor.getFullYear(), anchor.getMonth() - i, SALARY_DAY))
   }
 
   return months.map((monthStart) => {
-    const nextMonthStart = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 1)
+    const nextMonthStart = clampToMonth(monthStart.getFullYear(), monthStart.getMonth() + 1, SALARY_DAY)
     const byEnvelope = Object.fromEntries(ENVELOPES.map((e) => [e.key, 0]))
     let total = 0
     for (const tx of transactions) {

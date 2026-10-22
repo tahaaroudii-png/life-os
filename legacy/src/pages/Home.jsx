@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useSettings } from '../hooks/useSettings'
 import { useTransactions } from '../hooks/useTransactions'
-import { computeMonthlyEnvelopeStates, computeEmergencyFundState, totalLoans, startOfMonth, startOfNextMonth } from '../lib/budget'
+import { computeMonthlyEnvelopeStates, computeEmergencyFundState, totalLoans, startOfMonth, startOfNextMonth, SALARY_DAY } from '../lib/budget'
 import BudgetRing from '../components/BudgetRing'
 import NewSalaryModal from '../components/NewSalaryModal'
 import { formatDH, formatPercent } from '../lib/format'
@@ -29,6 +29,18 @@ export default function Home() {
     startOfNextMonth().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
   ), [])
 
+  // Le mois budgétaire court du 20 au 19 : les chiffres ci-dessous ne sont
+  // pas ceux du mois civil, il faut le dire plutôt que le laisser deviner.
+  const periode = useMemo(() => {
+    const d = (x) => x.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+    const fin = new Date(startOfNextMonth().getTime() - 1)
+    return `${d(startOfMonth())} → ${d(fin)}`
+  }, [])
+  const joursAvantSalaire = useMemo(() => {
+    const ms = startOfNextMonth().getTime() - Date.now()
+    return Math.max(0, Math.ceil(ms / 86400000))
+  }, [])
+
   if (settingsLoading || txLoading) {
     return <p className="muted">Chargement…</p>
   }
@@ -45,7 +57,12 @@ export default function Home() {
   return (
     <div className="page-home">
       <div className="page-home__header">
-        <h1 className="page-home__title">Ce mois-ci</h1>
+        <div>
+          <h1 className="page-home__title">Depuis le salaire</h1>
+          <p className="period-line">
+            {periode} · encore {joursAvantSalaire} j avant le {SALARY_DAY}
+          </p>
+        </div>
         <button type="button" className="btn-salary" onClick={() => setSalaryOpen(true)} title="Enregistrer un nouveau salaire mensuel">
           💰 Nouveau salaire
         </button>
