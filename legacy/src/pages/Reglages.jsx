@@ -101,6 +101,14 @@ export default function Reglages() {
         </p>
         <SetPinBanner variant="inline" />
       </section>
+
+      {/* Repère de version. Sans lui, impossible de savoir si l'app ouverte
+          est bien la dernière publiée ou une copie gardée en cache. */}
+      <p className="muted small" style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+        Version du {BUILD_DATE}
+      </p>
     </div>
   )
 }
+
+const BUILD_DATE = '22 octobre 2026'
