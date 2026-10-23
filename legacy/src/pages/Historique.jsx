@@ -1,24 +1,27 @@
 import { useMemo, useState } from 'react'
 import { useTransactions } from '../hooks/useTransactions'
 import { ENVELOPES, ENVELOPE_LABELS, TX_COLS } from '../lib/schema'
-import { formatDH, formatDateFR, monthKey } from '../lib/format'
+import { formatDH, formatDateFR } from '../lib/format'
+import { listPeriods, periodKey, formatPeriod, allocationFor } from '../lib/budget'
+import { useSettings } from '../hooks/useSettings'
+import PeriodTrends from '../components/PeriodTrends'
 import { exportTransactionsCSV, exportTransactionsJSON } from '../lib/export'
 
 export default function Historique() {
   const { transactions, isLoading, updateTransaction, deleteTransaction } = useTransactions()
+  const { settings } = useSettings()
+  // Le mois budgétaire court du 20 au 19 : filtrer sur le mois civil
+  // coupait chaque salaire en deux et rendait la comparaison fausse.
+  const periods = useMemo(() => listPeriods(transactions), [transactions])
   const [monthFilter, setMonthFilter] = useState('all')
   const [envelopeFilter, setEnvelopeFilter] = useState('all')
   const [editingId, setEditingId] = useState(null)
   const [editDraft, setEditDraft] = useState({ amount: '', note: '' })
 
-  const availableMonths = useMemo(() => {
-    const set = new Set(transactions.map((t) => monthKey(t[TX_COLS.occurredAt])))
-    return Array.from(set).sort().reverse()
-  }, [transactions])
 
   const filtered = useMemo(() => {
     return transactions.filter((t) => {
-      if (monthFilter !== 'all' && monthKey(t[TX_COLS.occurredAt]) !== monthFilter) return false
+      if (monthFilter !== 'all' && periodKey(t[TX_COLS.occurredAt]) !== monthFilter) return false
       if (envelopeFilter !== 'all' && t.envelope !== envelopeFilter) return false
       return true
     })
@@ -59,13 +62,15 @@ export default function Historique() {
         </div>
       </div>
 
+      <PeriodTrends periods={periods} settings={settings}
+                    selectedKey={monthFilter}
+                    onSelect={(k) => setMonthFilter(k)} />
+
       <div className="filters">
         <select value={monthFilter} onChange={(e) => setMonthFilter(e.target.value)}>
-          <option value="all">Tous les mois</option>
-          {availableMonths.map((mk) => (
-            <option key={mk} value={mk}>
-              {mk}
-            </option>
+          <option value="all">Toutes les périodes</option>
+          {periods.map((p) => (
+            <option key={p.key} value={p.key}>{p.label}</option>
           ))}
         </select>
 

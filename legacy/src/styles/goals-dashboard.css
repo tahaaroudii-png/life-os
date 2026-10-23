@@ -456,3 +456,98 @@
   margin: 2px 0 0; font-size: 0.8rem; color: var(--text-2, #475569);
   font-variant-numeric: tabular-nums;
 }
+
+/* ---- Tendances par période (du 20 au 19) ---- */
+.trends { margin: 0 0 1.5rem; }
+.trends__head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; margin-bottom: 0.75rem;
+}
+.trends__head h2 { margin: 0; font-size: 1.05rem; }
+.trends__hint { margin: 0.5rem 0 0; font-size: 0.76rem; color: var(--text-3, #94a3b8); }
+
+.trend { padding: 0.85rem 0; border-top: 1px solid var(--border, #e2e8f0); }
+.trend:first-of-type { border-top: none; }
+.trend__head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+}
+.trend__name { display: flex; align-items: center; gap: 7px; font-weight: 600; font-size: 0.92rem; }
+.trend__dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.trend__now { font-variant-numeric: tabular-nums; font-weight: 600; }
+.trend__now em {
+  font-style: normal; font-weight: 500; font-size: 0.78rem;
+  margin-left: 6px; color: var(--text-3, #94a3b8);
+}
+.trend__now em.is-up { color: var(--state-crit, #dc2626); }
+.trend__now em.is-down { color: var(--state-good, #16a34a); }
+
+.trend__plot { position: relative; height: 56px; margin: 10px 0 4px; }
+.trend__budget {
+  position: absolute; left: 0; right: 0; height: 0;
+  border-top: 1px dashed var(--text-3, #94a3b8); opacity: .75;
+}
+.trend__bars { display: flex; align-items: flex-end; gap: 5px; height: 100%; }
+.trend__axis {
+  display: flex; gap: 5px; margin-bottom: 6px;
+  font-size: 0.68rem; color: var(--text-3, #94a3b8);
+}
+.trend__axis span { flex: 1; text-align: center; }
+.trend__axis span.is-active { color: var(--text, #0f172a); font-weight: 600; }
+.trend__bar {
+  flex: 1; height: 100%; padding: 0; border: none; background: none;
+  cursor: pointer; display: flex; align-items: flex-end; border-radius: 3px;
+}
+.trend__bar span {
+  display: block; width: 100%; height: var(--h); min-height: 2px;
+  background: var(--c); opacity: .38; border-radius: 2px 2px 0 0;
+  transition: opacity .12s ease;
+}
+.trend__bar:hover span { opacity: .7; }
+.trend__bar.is-active span { opacity: 1; }
+.trend__bar.is-over span { background: var(--state-crit, #dc2626); opacity: .45; }
+.trend__bar.is-over.is-active span { opacity: 1; }
+.trend__bar:focus-visible { outline: 2px solid var(--accent, #2563eb); outline-offset: 2px; }
+
+.trend__foot { margin: 0; font-size: 0.76rem; color: var(--text-2, #475569); }
+
+/* ---- Fond d'urgence ---- */
+.fund {
+  margin-top: 1.25rem; padding: 1.1rem 1.15rem;
+  background: var(--surface, #fff); border: 1px solid var(--border, #e2e8f0);
+  border-radius: 14px;
+}
+.fund__head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+}
+.fund__head h2 { margin: 0; font-size: 1rem; }
+.fund__pct { font-variant-numeric: tabular-nums; color: var(--text-2, #475569); font-size: 0.88rem; }
+.fund__amount {
+  margin: 0.6rem 0 0.7rem; font-size: 1.9rem; font-weight: 700;
+  letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.1;
+}
+.fund__amount span {
+  display: block; font-size: 0.84rem; font-weight: 500;
+  color: var(--text-2, #475569); letter-spacing: 0; margin-top: 2px;
+}
+.fund__track {
+  height: 8px; border-radius: 4px; overflow: hidden;
+  background: var(--surface-2, #f1f5f9);
+}
+.fund__fill { height: 100%; border-radius: 4px; background: var(--state-good, #16a34a); }
+.fund__eta { margin: 0.55rem 0 0; font-size: 0.82rem; color: var(--text-2, #475569); }
+
+.fund__detail {
+  margin: 0.9rem 0 0; padding: 0.8rem 0 0;
+  border-top: 1px solid var(--border, #e2e8f0); font-size: 0.85rem;
+}
+.fund__detail > div {
+  display: flex; justify-content: space-between; gap: 12px; padding: 3px 0;
+}
+.fund__detail dt { color: var(--text-2, #475569); }
+.fund__detail dd {
+  margin: 0; font-variant-numeric: tabular-nums; font-weight: 500;
+  color: var(--text, #0f172a);
+}
+.fund__detail dd.is-plus { color: var(--state-good, #16a34a); }
+.fund__detail dd.is-minus { color: var(--state-crit, #dc2626); }
+.fund__add { margin-top: 0.9rem; width: 100%; }

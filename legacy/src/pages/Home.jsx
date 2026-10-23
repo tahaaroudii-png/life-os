@@ -4,10 +4,12 @@ import { useTransactions } from '../hooks/useTransactions'
 import { computeMonthlyEnvelopeStates, computeEmergencyFundState, totalLoans, startOfMonth, startOfNextMonth, SALARY_DAY } from '../lib/budget'
 import BudgetRing from '../components/BudgetRing'
 import NewSalaryModal from '../components/NewSalaryModal'
+import QuickAddModal from '../components/QuickAddModal'
 import { formatDH, formatPercent } from '../lib/format'
 
 export default function Home() {
   const [salaryOpen, setSalaryOpen] = useState(false)
+  const [fundOpen, setFundOpen] = useState(false)
   const { settings, isLoading: settingsLoading } = useSettings()
   const { transactions, isLoading: txLoading } = useTransactions()
 
@@ -85,50 +87,57 @@ export default function Home() {
         ))}
       </div>
 
-      <div className="emergency-card">
-        <div className="emergency-card__header">
-          <h2>🛟 Fond d'urgence</h2>
-          <span className="emergency-card__pct">{formatPercent(emergency.percent)}</span>
+      <section className="fund">
+        <header className="fund__head">
+          <h2>Fond d’urgence</h2>
+          <span className="fund__pct">{formatPercent(emergency.percent)}</span>
+        </header>
+
+        {/* Le solde en grand : c'est le seul chiffre qu'il vient chercher. */}
+        <p className="fund__amount">
+          {formatDH(emergency.cumulated)}
+          <span> sur {formatDH(emergency.goal)}</span>
+        </p>
+
+        <div className="fund__track">
+          <div className="fund__fill" style={{ width: `${Math.min(100, emergency.percent)}%` }} />
         </div>
-        <div className="envelope-card__bar-track">
-          <div
-            className="envelope-card__bar-fill envelope-card__bar-fill--green"
-            style={{ width: `${emergency.percent}%` }}
-          />
-        </div>
-        <div className="emergency-card__figures">
-          <span>
-            <strong>{formatDH(emergency.cumulated)}</strong> / {formatDH(emergency.goal)}
-          </span>
-          <span className="muted">
-            {emergency.monthsRemaining === 0
-              ? 'Objectif atteint 🎉'
-              : emergency.monthsRemaining
-              ? `≈ ${emergency.monthsRemaining} mois restants`
-              : '—'}
-          </span>
-        </div>
+
+        <p className="fund__eta">
+          {emergency.monthsRemaining === 0
+            ? 'Objectif atteint.'
+            : emergency.monthsRemaining
+            ? `Au rythme actuel, atteint dans ${emergency.monthsRemaining} mois.`
+            : 'Fixe un objectif dans Réglages pour suivre la progression.'}
+        </p>
 
         {/* D'où sort ce total. Un solde sans sa composition ne se vérifie
             pas : quand il paraît faux, on ne sait pas quoi corriger. */}
-        <ul className="emergency-card__breakdown">
-          <li>
-            <span>Mis de côté automatiquement</span>
-            <span>{formatDH(emergency.totalAllocated)}</span>
-          </li>
-          <li>
-            <span>Versements</span>
-            <span>{emergency.totalDeposited > 0 ? `+ ${formatDH(emergency.totalDeposited)}` : '—'}</span>
-          </li>
-          <li>
-            <span>Retraits</span>
-            <span>{emergency.totalSpent > 0 ? `− ${formatDH(emergency.totalSpent)}` : '—'}</span>
-          </li>
-        </ul>
-        <p className="emergency-card__hint">
-          Pour y verser une somme : « + Ajout » sur l’enveloppe Fond d’urgence.
-        </p>
-      </div>
+        <dl className="fund__detail">
+          <div>
+            <dt>Mis de côté chaque mois</dt>
+            <dd>{formatDH(emergency.totalAllocated)}</dd>
+          </div>
+          <div>
+            <dt>Versements</dt>
+            <dd className={emergency.totalDeposited > 0 ? 'is-plus' : ''}>
+              {emergency.totalDeposited > 0 ? `+ ${formatDH(emergency.totalDeposited)}` : '—'}
+            </dd>
+          </div>
+          <div>
+            <dt>Retraits</dt>
+            <dd className={emergency.totalSpent > 0 ? 'is-minus' : ''}>
+              {emergency.totalSpent > 0 ? `− ${formatDH(emergency.totalSpent)}` : '—'}
+            </dd>
+          </div>
+        </dl>
+
+        <button type="button" className="btn-secondary fund__add" onClick={() => setFundOpen(true)}>
+          Verser une somme
+        </button>
+      </section>
+
+      <QuickAddModal open={fundOpen} onClose={() => setFundOpen(false)} defaultEnvelope="urgence" />
     </div>
   )
 }

@@ -164,7 +164,10 @@ export function computeEmergencyFundState(settings, allUrgenceTransactions, now 
   let totalSpent = 0
   for (const tx of allUrgenceTransactions) {
     const amount = Number(tx.amount || 0)
-    if (isDeposit(tx)) totalDeposited += amount
+    // Un versement est enregistré en négatif (c'est la convention « Ajout »
+    // de la saisie rapide). L'additionner tel quel faisait BAISSER le fond
+    // du montant versé. On ne garde donc que sa grandeur.
+    if (isDeposit(tx)) totalDeposited += Math.abs(amount)
     else totalSpent += amount
   }
 
@@ -206,7 +209,7 @@ export function computeEmergencyFundHistory(settings, allUrgenceTransactions, mo
     for (const tx of allUrgenceTransactions) {
       if (new Date(tx[TX_COLS.occurredAt]) >= nextCursor) continue
       const amount = Number(tx.amount || 0)
-      if (isDeposit(tx)) depositedSoFar += amount
+      if (isDeposit(tx)) depositedSoFar += Math.abs(amount)
       else spentSoFar += amount
     }
     history.push({
@@ -249,4 +252,48 @@ export function progressColor(ratio) {
   if (ratio >= 1) return 'red'
   if (ratio >= 0.8) return 'orange'
   return 'green'
+}
+
+
+/** Identifiant stable d'une période budgétaire : l'année-mois de son 20. */
+export function periodKey(dateLike) {
+  const start = startOfMonth(new Date(dateLike))
+  return `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}`
+}
+
+/** « 20 oct. → 19 nov. 2026 » — la période telle qu'on la lit. */
+export function formatPeriod(dateLike) {
+  const start = startOfMonth(new Date(dateLike))
+  const end = new Date(startOfNextMonth(start).getTime() - 1)
+  const d = (x, withYear) => x.toLocaleDateString('fr-FR',
+    withYear ? { day: 'numeric', month: 'short', year: 'numeric' } : { day: 'numeric', month: 'short' })
+  return `${d(start, false)} → ${d(end, true)}`
+}
+
+/**
+ * Les périodes présentes dans les transactions, de la plus récente à la
+ * plus ancienne, avec le total dépensé par enveloppe.
+ */
+export function listPeriods(transactions) {
+  const byKey = new Map()
+  for (const tx of transactions) {
+    const when = tx[TX_COLS.occurredAt]
+    const key = periodKey(when)
+    if (!byKey.has(key)) {
+      byKey.set(key, {
+        key,
+        start: startOfMonth(new Date(when)),
+        label: formatPeriod(when),
+        byEnvelope: Object.fromEntries(ENVELOPES.map((e) => [e.key, 0])),
+        total: 0,
+        count: 0,
+      })
+    }
+    const p = byKey.get(key)
+    const amount = Number(tx.amount || 0)
+    p.byEnvelope[tx.envelope] = (p.byEnvelope[tx.envelope] || 0) + amount
+    p.total += amount
+    p.count += 1
+  }
+  return [...byKey.values()].sort((a, b) => b.start - a.start)
 }
