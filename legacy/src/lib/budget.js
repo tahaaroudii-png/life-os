@@ -20,6 +20,32 @@ export const LOAN_PREFIX = '[PRÊT] '
  */
 export const DEPOSIT_PREFIX = '[APPORT] '
 
+/**
+ * Préfixe d'une entrée d'argent sur une enveloppe ordinaire.
+ *
+ * La base refuse les montants négatifs (contrainte transactions_amount_check),
+ * et c'est ainsi que « + Ajout » les enregistrait : chaque ajout était rejeté
+ * puis rangé en file d'attente, sans que rien ne le signale. Une entrée est
+ * donc stockée en POSITIF et reconnue à sa note ; elle vient en déduction du
+ * dépensé plutôt qu'en plus.
+ */
+export const INCOME_PREFIX = '[AJOUT] '
+
+export function isIncome(tx) {
+  return typeof tx?.note === 'string' && tx.note.startsWith(INCOME_PREFIX)
+}
+
+export function incomeNote(userNote) {
+  const clean = (userNote || '').trim()
+  return `${INCOME_PREFIX}${clean}`.trim()
+}
+
+/** Ce que la transaction pèse dans le dépensé d'une enveloppe. */
+export function spendValue(tx) {
+  const amount = Number(tx?.amount || 0)
+  return (isIncome(tx) || isDeposit(tx)) ? -Math.abs(amount) : amount
+}
+
 export function isDeposit(tx) {
   return typeof tx?.note === 'string' && tx.note.startsWith(DEPOSIT_PREFIX)
 }
@@ -32,7 +58,7 @@ export function depositNote(userNote) {
 /** Le libellé sans son préfixe technique, pour l'affichage. */
 export function cleanNote(note) {
   if (typeof note !== 'string') return ''
-  return note.replace(DEPOSIT_PREFIX, '').replace(LOAN_PREFIX, '').trim()
+  return note.replace(DEPOSIT_PREFIX, '').replace(INCOME_PREFIX, '').replace(LOAN_PREFIX, '').trim()
 }
 
 export function isLoan(tx) {
@@ -126,7 +152,7 @@ export function computeMonthlyEnvelopeStates(settings, transactions, now = new D
   for (const tx of transactions) {
     const d = new Date(tx[TX_COLS.occurredAt])
     if (d >= monthStart && d < nextMonthStart) {
-      spentByEnvelope[tx.envelope] = (spentByEnvelope[tx.envelope] || 0) + Number(tx.amount || 0)
+      spentByEnvelope[tx.envelope] = (spentByEnvelope[tx.envelope] || 0) + spendValue(tx)
     }
   }
 
@@ -238,8 +264,8 @@ export function computeMonthlySeries(transactions, monthsToShow = 6, now = new D
     for (const tx of transactions) {
       const d = new Date(tx[TX_COLS.occurredAt])
       if (d >= monthStart && d < nextMonthStart) {
-        byEnvelope[tx.envelope] = (byEnvelope[tx.envelope] || 0) + Number(tx.amount || 0)
-        total += Number(tx.amount || 0)
+        byEnvelope[tx.envelope] = (byEnvelope[tx.envelope] || 0) + spendValue(tx)
+        total += spendValue(tx)
       }
     }
     return { month: monthStart, byEnvelope, total }
@@ -290,7 +316,7 @@ export function listPeriods(transactions) {
       })
     }
     const p = byKey.get(key)
-    const amount = Number(tx.amount || 0)
+    const amount = spendValue(tx)
     p.byEnvelope[tx.envelope] = (p.byEnvelope[tx.envelope] || 0) + amount
     p.total += amount
     p.count += 1

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ENVELOPES } from '../lib/schema'
-import { loanNote, depositNote } from '../lib/budget'
+import { loanNote, depositNote, incomeNote } from '../lib/budget'
 import { useTransactions } from '../hooks/useTransactions'
 
 /**
@@ -30,6 +30,7 @@ export default function QuickAddModal({ open, onClose, defaultEnvelope }) {
   const [type, setType] = useState('expense')
   const [submitting, setSubmitting] = useState(false)
   const [feedback, setFeedback] = useState(null)
+  const [errorMsg, setErrorMsg] = useState(null)
 
   if (!open) return null
 
@@ -39,16 +40,23 @@ export default function QuickAddModal({ open, onClose, defaultEnvelope }) {
     // français. parseFloat s'arrête à la première espace ou virgule et
     // transformait 20 000 en 20 : le gros montant disparaissait en silence.
     const numAmount = parseAmount(amount)
-    if (!numAmount || numAmount <= 0) return
+    if (!numAmount || numAmount <= 0) {
+      setFeedback('error')
+      setErrorMsg("Montant illisible. Écris un nombre, par exemple 25 000.")
+      return
+    }
+    setErrorMsg(null)
 
     setSubmitting(true)
     // Signe et note selon le type
-    const signedAmount = type === 'income' ? -Math.abs(numAmount) : Math.abs(numAmount)
+    // Toujours positif : la base refuse les négatifs. Le sens se lit dans
+    // la note, pas dans le signe.
+    const signedAmount = Math.abs(numAmount)
     let finalNote = note
     if (type === 'loan') finalNote = loanNote(note)
-    // Un versement sur le fond d'urgence est nommé : sans cela, impossible
-    // de distinguer plus tard un apport d'un retrait annulé.
-    else if (type === 'income' && envelope === 'urgence') finalNote = depositNote(note)
+    else if (type === 'income') {
+      finalNote = envelope === 'urgence' ? depositNote(note) : incomeNote(note)
+    }
 
     const result = await addTransaction.mutateAsync({
       amount: signedAmount, envelope, note: finalNote,
@@ -58,6 +66,13 @@ export default function QuickAddModal({ open, onClose, defaultEnvelope }) {
     setAmount('')
     setNote('')
     setType('expense')
+    if (result.queued && result.error) {
+      // Mis en file alors qu'on est en ligne : ce n'est pas une attente,
+      // c'est un refus de la base. Le taire fait disparaître la saisie.
+      setFeedback('error')
+      setErrorMsg(result.error.message || 'Enregistrement refusé par la base.')
+      return
+    }
     setFeedback(result.queued ? 'queued' : 'ok')
     setTimeout(() => { setFeedback(null); onClose() }, 700)
   }
@@ -143,6 +158,7 @@ export default function QuickAddModal({ open, onClose, defaultEnvelope }) {
 
           {feedback === 'queued' && <p className="muted small">📥 Hors-ligne : sera synchronisé au retour du réseau.</p>}
           {feedback === 'ok' && <p className="muted small">✅ Enregistré.</p>}
+          {feedback === 'error' && <p className="error-text small">{errorMsg}</p>}
         </form>
       </div>
     </div>

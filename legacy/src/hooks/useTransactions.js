@@ -106,8 +106,10 @@ export function useTransactions() {
 
       const { error } = await supabase.from(TABLES.transactions).insert(payload)
       if (error) {
-        // Le insert a échoué pour une raison possiblement réseau : on met en file
-        // plutôt que de perdre la saisie.
+        // On met en file pour ne pas perdre la saisie, mais on renvoie
+        // l'erreur : un refus de la base n'est pas une attente de réseau.
+        // Le confondre avec « hors-ligne » a fait disparaître sept
+        // versements pendant des semaines sans un mot.
         await enqueueTransaction(payload)
         return { queued: true, payload, error }
       }
