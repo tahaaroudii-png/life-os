@@ -556,9 +556,9 @@
    Vert profond, l'arabe en Amiri à sa taille, une date en tête qui
    déplace le lecteur à la fin de l'année. ---- */
 .vow {
-  /* Collant sous l'en-tête : ils restent sous les yeux pendant qu'on
-     parcourt les tâches, comme la barre de sections. */
-  position: sticky; top: var(--vow-top, 0px); z-index: 9;
+  /* Seul élément qui reste à l'écran pendant qu'on parcourt les tâches.
+     L'en-tête défile désormais, donc le bloc se cale tout en haut. */
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9;
   margin: 0 0 1.25rem; padding: 1.1rem 1.2rem 1rem;
   background: #0f2e1f; border-radius: 16px; color: #e9f4ee;
   text-align: center;

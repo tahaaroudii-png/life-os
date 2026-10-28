@@ -152,9 +152,8 @@ label {
   padding: 0.85rem 1.25rem;
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  /* La barre de sections défile avec la page : figée, elle occupait une
+     bande permanente sans jamais servir pendant la lecture. */
 }
 .app-header__title {
   font-weight: 700;
