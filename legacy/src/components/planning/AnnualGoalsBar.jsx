@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useGoals } from '../../hooks/useGoals'
 import { labelAccompli, estArabe } from '../../lib/goals'
 
@@ -12,6 +12,22 @@ import { labelAccompli, estArabe } from '../../lib/goals'
  */
 export default function AnnualGoalsBar() {
   const { state } = useGoals()
+  const ref = useRef(null)
+
+  /* Le bloc se cale juste sous l'en-tête, qui est lui-même collant. Sa
+     hauteur dépend de la largeur de l'écran, donc on la mesure plutôt
+     que de la deviner : un nombre en dur laisserait un trou ou un
+     recouvrement selon le téléphone. */
+  useEffect(() => {
+    const poser = () => {
+      const entete = document.querySelector('.app-header')
+      const h = entete ? entete.getBoundingClientRect().height : 0
+      if (ref.current) ref.current.style.setProperty('--vow-top', `${Math.round(h)}px`)
+    }
+    poser()
+    window.addEventListener('resize', poser)
+    return () => window.removeEventListener('resize', poser)
+  }, [state])
 
   // Tous les objectifs, les privés compris : cet écran est le sien, et un
   // objectif caché le matin est un objectif qui ne pèse pas sur la journée.
@@ -26,7 +42,7 @@ export default function AnnualGoalsBar() {
     : null
 
   return (
-    <section className="vow">
+    <section className="vow" ref={ref}>
       {dateFin && <p className="vow__date">{dateFin}</p>}
 
       <ul className="vow__list">
