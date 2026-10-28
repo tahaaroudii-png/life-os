@@ -15,6 +15,7 @@ import { formatDateFR } from '../../lib/format'
 import TaskLine from '../../components/planning/TaskLine'
 import QuickAddTaskModal from '../../components/planning/QuickAddTaskModal'
 import AxisRing from '../../components/planning/AxisRing'
+import AnnualGoalsBar from '../../components/planning/AnnualGoalsBar'
 import StreakBoard from '../../components/planning/StreakBoard'
 import PostponeSheet from '../../components/planning/PostponeSheet'
 import TimeEditSheet from '../../components/planning/TimeEditSheet'
@@ -215,6 +216,8 @@ export default function Aujourdhui() {
       )}
 
       <StreakBoard streaks={habitStreaks} />
+
+      <AnnualGoalsBar />
 
       <div className="axis-rings">
         {byAxis.map(({ axis, items }) => {
