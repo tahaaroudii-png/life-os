@@ -20,10 +20,17 @@ export default function AnnualGoalsBar() {
   if (visibles.length === 0) return null
 
   const card = state?.card || {}
+  // La date de fin d'année, en tête : c'est elle qui met les phrases au
+  // passé. « Tu ne vises plus, tu te souviens. »
+  const dateFin = card.deadline
+    ? new Date(card.deadline + 'T12:00:00')
+        .toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+    : '31 décembre 2026'
 
   return (
     <section className="vow">
 
+      <p className="vow__date">{dateFin}</p>
       <ul className="vow__list">
         {visibles.map((g) => {
           const texte = labelAccompli(g)
