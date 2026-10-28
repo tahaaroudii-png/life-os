@@ -3,11 +3,14 @@ import { useGoals } from '../../hooks/useGoals'
 import { DOMAINS } from '../../lib/goals'
 
 /**
- * Les objectifs de l'année, écrits, devant soi au moment de planifier.
+ * La page qu'on relit le matin.
  *
- * Volontairement sans jauge, sans pourcentage, sans verdict et sans case à
- * cocher : la mesure vit sur la page Objectifs. Ici on relit ce qu'on s'est
- * promis avant de choisir ce qu'on fait de la journée — rien d'autre.
+ * Ce n'est pas une liste de données : c'est ce que Tahar s'est promis,
+ * dans ses mots, dont la moitié en arabe. D'où un panneau sombre — le
+ * seul de l'écran — pour qu'on le lise avant les tâches ; l'arabe en
+ * Amiri, à sa taille, parce que c'est le cœur de la chose ; et un filet
+ * de couleur par domaine, qui porte une information plutôt qu'il ne
+ * décore. Aucune mesure : elle vit sur la page Objectifs.
  */
 export default function AnnualGoalsBar() {
   const { state } = useGoals()
@@ -27,29 +30,30 @@ export default function AnnualGoalsBar() {
   const annee = (card.deadline || '').slice(0, 4)
 
   return (
-    <section className="agoals">
-      <header className="agoals__head">
-        <h2>{card.title || `Objectifs ${annee}`}</h2>
-      </header>
+    <section className="vow">
+      <p className="vow__question">{card.title || `Objectifs ${annee}`}</p>
 
-      {card.motto && <p className="agoals__motto">{card.motto}</p>}
-
-      <ul className="agoals__list">
-        {visibles.map((g) => (
-          <li key={g.id} className="agoal">
-            <span className="agoal__dot" style={{ background: DOMAINS[g.domain]?.light || 'var(--text-3)' }} />
-            <div>
-              <p className="agoal__label">{g.labelAr || g.label}</p>
-              {g.subtitle && <p className="agoal__sub">{g.subtitle}</p>}
-            </div>
-          </li>
-        ))}
+      <ul className="vow__list">
+        {visibles.map((g) => {
+          const arabe = !!g.labelAr
+          return (
+            <li key={g.id} className="vow__item"
+                style={{ '--dom': DOMAINS[g.domain]?.light || 'currentColor' }}>
+              <p className={`vow__goal ${arabe ? 'is-ar' : ''}`} lang={arabe ? 'ar' : 'fr'}>
+                {g.labelAr || g.label}
+              </p>
+              {g.subtitle && <p className="vow__sub">{g.subtitle}</p>}
+            </li>
+          )
+        })}
       </ul>
 
+      {card.motto && <p className="vow__motto">{card.motto}</p>}
+
       {nbPrives > 0 && (
-        <button type="button" className="btn-link agoals__toggle"
+        <button type="button" className="vow__toggle"
                 onClick={() => setShowPrivate((v) => !v)}>
-          {showPrivate ? 'Masquer les objectifs privés' : `Afficher les ${nbPrives} objectifs privés`}
+          {showPrivate ? 'Masquer les objectifs privés' : `+ ${nbPrives} objectifs privés`}
         </button>
       )}
     </section>

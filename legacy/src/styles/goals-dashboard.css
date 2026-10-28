@@ -552,32 +552,53 @@
 .fund__detail dd.is-minus { color: var(--state-crit, #dc2626); }
 .fund__add { margin-top: 0.9rem; width: 100%; }
 
-/* ---- Objectifs annuels sur l'écran de planification ----
-   Une feuille qu'on relit, pas un tableau de bord. ---- */
-.agoals {
-  margin: 0 0 1.25rem; padding: 1.05rem 1.15rem;
-  background: var(--surface, #fff); border: 1px solid var(--border, #e2e8f0);
-  border-radius: 14px;
+/* ---- La page qu'on relit le matin ----
+   Un seul panneau sombre sur un écran clair : c'est ce qu'on lit
+   d'abord, et la seule audace de l'écran. ---- */
+.vow {
+  margin: 0 0 1.25rem; padding: 1.5rem 1.4rem 1.3rem;
+  background: #101722; border-radius: 18px; color: #eef2f8;
 }
-.agoals__head h2 { margin: 0; font-size: 1rem; line-height: 1.35; }
-.agoals__motto {
-  margin: 0.3rem 0 0; font-size: 0.85rem; font-style: italic;
-  color: var(--text-2, #475569);
+.vow__question {
+  margin: 0 0 1.2rem; font-size: 0.82rem; line-height: 1.45;
+  color: #8fa0b8; font-weight: 500; max-width: 34ch;
 }
-.agoals__list { list-style: none; margin: 0.9rem 0 0; padding: 0; }
-.agoals__toggle { margin-top: 0.8rem; }
+.vow__list { list-style: none; margin: 0; padding: 0; }
 
-.agoal {
-  display: flex; align-items: flex-start; gap: 10px;
-  padding: 0.5rem 0;
+.vow__item {
+  padding: 0.5rem 0 0.5rem 1rem;
+  border-left: 2px solid var(--dom);
+  margin-bottom: 0.7rem;
 }
-.agoal__dot {
-  width: 7px; height: 7px; border-radius: 50%; flex: none; margin-top: 8px;
+.vow__item:last-child { margin-bottom: 0; }
+
+.vow__goal {
+  margin: 0; font-size: 1.12rem; font-weight: 600;
+  line-height: 1.35; letter-spacing: -0.01em; overflow-wrap: anywhere;
 }
-.agoal__label {
-  margin: 0; font-size: 1rem; font-weight: 600; line-height: 1.4;
-  overflow-wrap: anywhere;
+.vow__goal.is-ar {
+  font-family: var(--ds-ar, 'Amiri', serif);
+  font-size: 1.55rem; font-weight: 700; line-height: 1.5;
+  letter-spacing: 0;
+  /* L'ordre des caractères reste celui de l'arabe ; seul le bloc est
+     calé à gauche, pour que le texte et son sous-titre français
+     partagent la même marge au lieu de se renvoyer dos à dos. */
+  direction: rtl; text-align: left;
 }
-.agoal__sub {
-  margin: 1px 0 0; font-size: 0.8rem; color: var(--text-2, #475569); line-height: 1.35;
+.vow__sub {
+  margin: 0.15rem 0 0; font-size: 0.78rem; line-height: 1.4; color: #7e90a8;
 }
+
+.vow__motto {
+  margin: 1.3rem 0 0; padding-top: 0.95rem;
+  border-top: 1px solid rgba(255,255,255,.1);
+  font-family: var(--ds-ar, serif); font-size: 0.95rem; font-style: italic;
+  color: #c3cedd; text-align: center;
+}
+
+.vow__toggle {
+  margin-top: 0.9rem; padding: 0; font: inherit; font-size: 0.78rem;
+  background: none; border: none; color: #8fa0b8; cursor: pointer;
+}
+.vow__toggle:hover { color: #eef2f8; }
+.vow__toggle:focus-visible { outline: 2px solid #5b8ff9; outline-offset: 3px; border-radius: 3px; }
