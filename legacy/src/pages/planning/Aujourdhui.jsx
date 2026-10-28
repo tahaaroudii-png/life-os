@@ -187,6 +187,11 @@ export default function Aujourdhui() {
   return (
     <div className="page-aujourdhui">
 
+      {/* Avant tout le reste : c'est pour les relire que cet écran s'ouvre
+          le matin. Enfoui sous l'en-tête et le tableau des séries, il
+          fallait parcourir presque un écran entier pour les atteindre. */}
+      <AnnualGoalsBar />
+
       <header className="today-header">
         <div className="today-header__intro">
           <h1 className="today-header__title">Aujourd'hui</h1>
@@ -217,7 +222,6 @@ export default function Aujourdhui() {
 
       <StreakBoard streaks={habitStreaks} />
 
-      <AnnualGoalsBar />
 
       <div className="axis-rings">
         {byAxis.map(({ axis, items }) => {

@@ -151,3 +151,29 @@
   opacity: 1; color: var(--ds-text);
   background: var(--ds-card-alt);
 }
+
+/* ------------------------------------------------------------------ */
+/* Téléphone : une seule rangée                                        */
+/* ------------------------------------------------------------------ */
+/*
+ * À 375 px de large, quatre cercles de 88 px séparés de 22 px réclament
+ * 419 px : ils passaient donc sur deux rangées, et l'en-tête mangeait
+ * 289 px — plus du tiers de l'écran avant la moindre information. On les
+ * resserre jusqu'à ce que la rangée tienne, plutôt que de la laisser se
+ * replier.
+ */
+@media (max-width: 560px) {
+  .orbs {
+    flex-wrap: nowrap;
+    gap: clamp(8px, 3vw, 18px);
+    padding: 12px 10px 26px;
+  }
+  .orb {
+    width: clamp(58px, 17vw, 76px);
+    height: clamp(58px, 17vw, 76px);
+  }
+  .orb-icon { font-size: clamp(24px, 6.5vw, 32px); }
+  .orb-label { bottom: -19px; font-size: 11.5px; }
+  /* Les animations de halo coûtent cher sur mobile pour un décor. */
+  .orb-halo, .orb-ring { animation: none; }
+}
