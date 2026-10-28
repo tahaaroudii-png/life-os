@@ -556,8 +556,9 @@
    Vert profond, l'arabe en Amiri à sa taille, une date en tête qui
    déplace le lecteur à la fin de l'année. ---- */
 .vow {
-  margin: 0 0 1.25rem; padding: 1.75rem 1.4rem 1.4rem;
+  margin: 0 0 1.25rem; padding: 1.9rem 1.4rem 1.6rem;
   background: #0f2e1f; border-radius: 18px; color: #e9f4ee;
+  text-align: center;
 }
 .vow__date {
   margin: 0 0 1.4rem; font-size: 0.64rem; letter-spacing: .24em;
@@ -565,16 +566,16 @@
 }
 .vow__list { list-style: none; margin: 0; padding: 0; }
 .vow__line {
-  margin: 0 0 1rem; font-size: 1.06rem; font-weight: 500; line-height: 1.45;
-  overflow-wrap: anywhere;
+  margin: 0 auto 1.1rem; font-size: 1.06rem; font-weight: 500; line-height: 1.45;
+  overflow-wrap: anywhere; max-width: 28ch;
 }
 .vow__line:last-child { margin-bottom: 0; }
 .vow__line.is-ar {
   font-family: var(--ds-ar, 'Amiri', serif);
   font-size: 1.55rem; font-weight: 700; line-height: 1.5;
-  /* L'ordre des caractères reste celui de l'arabe ; le bloc est calé à
-     gauche pour que toutes les lignes partagent la même marge. */
-  direction: rtl; text-align: left;
+  /* L'ordre des caractères reste celui de l'arabe ; le centrage vaut
+     pour les deux écritures et les met sur un même axe. */
+  direction: rtl;
 }
 .vow__motto {
   margin: 1.6rem 0 0; padding-top: 1.1rem;
@@ -582,9 +583,3 @@
   font-family: var(--ds-ar, serif); font-style: italic; font-size: 0.92rem;
   color: #9fc7b4; text-align: center;
 }
-.vow__toggle {
-  margin-top: 1rem; padding: 0; font: inherit; font-size: 0.76rem;
-  background: none; border: none; color: #79ab93; cursor: pointer;
-}
-.vow__toggle:hover { color: #e9f4ee; }
-.vow__toggle:focus-visible { outline: 2px solid #45b8a6; outline-offset: 3px; border-radius: 3px; }

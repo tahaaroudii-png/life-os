@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useGoals } from '../../hooks/useGoals'
 import { labelAccompli, estArabe } from '../../lib/goals'
 
@@ -12,15 +12,10 @@ import { labelAccompli, estArabe } from '../../lib/goals'
  */
 export default function AnnualGoalsBar() {
   const { state } = useGoals()
-  const [showPrivate, setShowPrivate] = useState(false)
 
-  const { visibles, nbPrives } = useMemo(() => {
-    const rows = state?.goals || []
-    return {
-      visibles: rows.filter((g) => showPrivate || !g.private),
-      nbPrives: rows.filter((g) => g.private).length,
-    }
-  }, [state, showPrivate])
+  // Tous les objectifs, les privés compris : cet écran est le sien, et un
+  // objectif caché le matin est un objectif qui ne pèse pas sur la journée.
+  const visibles = useMemo(() => state?.goals || [], [state])
 
   if (visibles.length === 0) return null
 
@@ -46,13 +41,6 @@ export default function AnnualGoalsBar() {
       </ul>
 
       {card.motto && <p className="vow__motto">{card.motto}</p>}
-
-      {nbPrives > 0 && (
-        <button type="button" className="vow__toggle"
-                onClick={() => setShowPrivate((v) => !v)}>
-          {showPrivate ? 'Masquer les objectifs privés' : `+ ${nbPrives} objectifs privés`}
-        </button>
-      )}
     </section>
   )
 }
