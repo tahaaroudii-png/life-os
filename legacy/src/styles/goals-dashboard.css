@@ -556,35 +556,41 @@
    Vert profond, l'arabe en Amiri à sa taille, une date en tête qui
    déplace le lecteur à la fin de l'année. ---- */
 .vow {
-  /* Seul élément qui reste à l'écran pendant qu'on parcourt les tâches.
-     L'en-tête défile désormais, donc le bloc se cale tout en haut. */
+  /* Le seul bloc qui reste à l'écran pendant qu'on parcourt la journée.
+     Il ne défile donc PAS en interne : un objectif à moitié coupé, ou qui
+     glisse dans son cadre, ne se lit pas. Le bloc prend la hauteur de ses
+     sept lignes, et on le resserre jusqu'à ce qu'elles y tiennent. */
   position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9;
-  margin: 0 0 1.25rem; padding: 1.1rem 1.2rem 1rem;
-  background: #0f2e1f; border-radius: 16px; color: #e9f4ee;
+  margin: 0 0 1rem; padding: 0.75rem 0.9rem;
+  background: #0d2a1c; border-radius: 14px; color: #f2faf6;
   text-align: center;
-  max-height: 46vh; overflow-y: auto;
-  box-shadow: 0 10px 24px -14px #000000a6;
-}
-.vow__date {
-  margin: 0 0 0.85rem; font-size: 0.6rem; letter-spacing: .22em;
-  text-transform: uppercase; color: #79ab93;
+  box-shadow: 0 12px 28px -16px #000000c4;
 }
 .vow__list { list-style: none; margin: 0; padding: 0; }
 .vow__line {
-  margin: 0 auto 0.4rem; font-size: 0.92rem; font-weight: 500; line-height: 1.35;
-  overflow-wrap: anywhere; max-width: 30ch;
+  margin: 0 auto; padding: 0.26rem 0;
+  font-size: 0.9rem; font-weight: 600; line-height: 1.3;
+  overflow-wrap: anywhere; max-width: 32ch;
+  border-bottom: 1px solid rgba(255,255,255,.07);
 }
-.vow__line:last-child { margin-bottom: 0; }
+.vow__line:last-child { border-bottom: 0; }
 .vow__line.is-ar {
   font-family: var(--ds-ar, 'Amiri', serif);
-  font-size: 1.08rem; font-weight: 700; line-height: 1.65;
-  /* L'ordre des caractères reste celui de l'arabe ; le centrage vaut
-     pour les deux écritures et les met sur un même axe. */
+  /* L'ordre des caractères reste celui de l'arabe ; le centrage met les
+     deux écritures sur un même axe. */
   direction: rtl;
+  font-size: 1.02rem; font-weight: 700; line-height: 1.5;
 }
 .vow__motto {
-  margin: 0.7rem 0 0; padding-top: 0.6rem;
-  border-top: 1px solid rgba(255,255,255,.12);
-  font-family: var(--ds-ar, serif); font-style: italic; font-size: 0.92rem;
-  color: #9fc7b4; text-align: center; font-size: 0.84rem;
+  margin: 0.55rem 0 0; padding-top: 0.5rem;
+  border-top: 1px solid rgba(255,255,255,.14);
+  font-family: var(--ds-ar, serif); font-size: 0.74rem;
+  letter-spacing: .04em; color: #8fc0aa; text-align: center;
+}
+/* Écran court : on resserre encore plutôt que de couper. */
+@media (max-height: 740px) {
+  .vow { padding: 0.6rem 0.8rem; }
+  .vow__line { padding: 0.18rem 0; font-size: 0.84rem; }
+  .vow__line.is-ar { font-size: 0.95rem; line-height: 1.42; }
+  .vow__motto { display: none; }
 }

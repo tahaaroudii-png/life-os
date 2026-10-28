@@ -20,14 +20,9 @@ export default function AnnualGoalsBar() {
   if (visibles.length === 0) return null
 
   const card = state?.card || {}
-  const dateFin = card.deadline
-    ? new Date(card.deadline + 'T12:00:00').toLocaleDateString('fr-FR',
-        { day: 'numeric', month: 'long', year: 'numeric' })
-    : null
 
   return (
     <section className="vow">
-      {dateFin && <p className="vow__date">{dateFin}</p>}
 
       <ul className="vow__list">
         {visibles.map((g) => {
