@@ -37,28 +37,22 @@ const ECOM_NAV = [
   { to: '/ecom/reglages',   label: 'Réglages',   icon: '⚙️' },
 ]
 
-const GOALS_NAV = [
-  { to: '/goals', label: 'Objectifs 2026', icon: '🎯' },
-]
-
 const SECTIONS = [
   { key: 'budget',   icon: '💰', label: 'Budget',     root: '/',          nav: BUDGET_NAV },
   { key: 'planning', icon: '✅', label: 'Planning',   root: '/planning',  nav: PLANNING_NAV },
   { key: 'oncf',     icon: '🚂', label: 'ONCF',       root: '/oncf',      nav: ONCF_NAV },
   { key: 'ecom',     icon: '🛒', label: 'E-commerce', root: '/ecom',      nav: ECOM_NAV },
-  { key: 'goals',    icon: '🎯', label: 'Objectifs',  root: '/goals',     nav: GOALS_NAV },
 ]
 
 function detectSection(pathname) {
   if (pathname.startsWith('/planning')) return SECTIONS[1]
   if (pathname.startsWith('/oncf'))     return SECTIONS[2]
   if (pathname.startsWith('/ecom'))     return SECTIONS[3]
-  if (pathname.startsWith('/goals'))    return SECTIONS[4]
   return SECTIONS[0]
 }
 
 // Routes qui doivent matcher "end" pour l'état actif (racines de chaque section).
-const END_ROUTES = new Set(['/', '/planning', '/oncf', '/ecom', '/goals'])
+const END_ROUTES = new Set(['/', '/planning', '/oncf', '/ecom'])
 
 export default function Layout() {
   const { signOut } = useAuth()

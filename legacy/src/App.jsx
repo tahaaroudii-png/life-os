@@ -19,7 +19,6 @@ import EcomMedia from './pages/ecom/EcomMedia'
 import EcomStock from './pages/ecom/EcomStock'
 import EcomSoir from './pages/ecom/EcomSoir'
 import Aide from './pages/Aide'
-import GoalsHome from './pages/goals/GoalsHome'
 
 export default function App() {
   const { user, loading } = useAuth()
@@ -61,7 +60,6 @@ export default function App() {
           <Route path="/ecom/mouvements" element={<EcomMouvements />} />
           <Route path="/ecom/reglages" element={<EcomReglages />} />
           {/* Objectifs 2026 */}
-          <Route path="/goals" element={<GoalsHome />} />
           {/* Aide */}
           <Route path="/aide" element={<Aide />} />
           <Route path="*" element={<Navigate to="/" replace />} />
