@@ -1,0 +1,49 @@
+/* Le bandeau des objectifs de l'année, sur l'écran du matin.
+   Ses règles vivaient dans la feuille du tableau de bord Objectifs ; la
+   rubrique supprimée, plus personne ne chargeait cette feuille et le
+   bandeau s'affichait brut. Il porte désormais ses propres styles. */
+
+.vow {
+  /* Le format « futur antérieur » qu'il a choisi : vert profond, grande
+     calligraphie, la date de fin d'année en tête, la devise en pied.
+     Il reste à l'écran pendant qu'on parcourt la journée, donc chaque
+     mesure est exprimée en hauteur de fenêtre : le bloc se resserre de
+     lui-même sur un petit téléphone au lieu d'être tronqué. */
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9;
+  margin: 0 0 1.1rem;
+  padding: clamp(0.75rem, 1.75vh, 1.7rem) clamp(1rem, 4.5vw, 1.5rem);
+  background: #0f2e1f; color: #e9f4ee;
+  border-radius: 18px; text-align: center;
+  box-shadow: 0 18px 38px -22px #000000d9;
+}
+.vow__date {
+  margin: 0 0 clamp(0.55rem, 1.25vh, 1.3rem);
+  font-size: 0.6rem; letter-spacing: .26em; text-transform: uppercase;
+  color: #79ab93;
+}
+.vow__list { list-style: none; margin: 0; padding: 0; }
+.vow__line {
+  margin: 0 0 clamp(0.32rem, 0.95vh, 0.95rem);
+  font-size: clamp(0.86rem, 1.7vh, 1.05rem); font-weight: 500;
+  line-height: 1.45; overflow-wrap: anywhere;
+}
+.vow__line:last-child { margin-bottom: 0; }
+.vow__line.is-ar {
+  font-family: var(--ds-ar, 'Amiri', serif);
+  /* L'arabe garde son sens de lecture ; le bloc, lui, reste centré, pour
+     que les deux écritures tiennent sur un même axe. */
+  direction: rtl;
+  font-size: clamp(1rem, 2.05vh, 1.45rem); font-weight: 600;
+  line-height: 1.45;
+}
+.vow__motto {
+  margin: clamp(0.6rem, 1.3vh, 1.4rem) 0 0;
+  padding-top: clamp(0.45rem, 1vh, 1rem);
+  border-top: 1px solid #ffffff1f;
+  font-family: var(--ds-serif, Georgia, serif); font-style: italic;
+  font-size: clamp(0.72rem, 1.5vh, 0.9rem); color: #9fc7b4;
+}
+/* Écran vraiment court : la devise cède la place aux objectifs. */
+@media (max-height: 680px) {
+  .vow__motto { display: none; }
+  .vow__date { margin-bottom: 0.6rem; }

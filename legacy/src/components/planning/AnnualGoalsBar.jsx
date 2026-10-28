@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useGoals } from '../../hooks/useGoals'
 import { labelAccompli, estArabe } from '../../lib/goals'
+import '../../styles/vow.css'
 
 /**
  * Les objectifs de l'année, relus depuis le 31 décembre.
