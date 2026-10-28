@@ -1,0 +1,133 @@
+/* L'écran d'analyse : quatre réponses d'abord, les détails ensuite. */
+
+.page-analyse { padding-bottom: 1rem; }
+
+.analyse__header { margin-bottom: 1rem; }
+.analyse__header h1 { margin: 0; font-size: 1.4rem; }
+.analyse__period {
+  margin: 0.15rem 0 0; font-size: 0.82rem; color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Les quatre réponses ---------- */
+.answers {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;
+  margin-bottom: 1.1rem;
+}
+.answer {
+  background: var(--color-surface); border: 1px solid var(--color-border);
+  border-radius: 14px; padding: 0.75rem 0.8rem;
+  display: flex; flex-direction: column; gap: 0.15rem;
+}
+.answer__q {
+  margin: 0; font-size: 0.68rem; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--color-muted);
+}
+.answer__v {
+  margin: 0; font-size: 1.32rem; font-weight: 800; line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+.answer__s { margin: 0; font-size: 0.73rem; line-height: 1.35; color: var(--color-muted); }
+.answer__s strong { color: var(--color-text); font-weight: 700; }
+/* Deux états méritent d'être vus sans lire : le dépassement et la perte sèche. */
+.answer--alert { border-color: #fca5a5; background: #fef2f2; }
+.answer--alert .answer__v { color: #b91c1c; }
+.answer--leak { border-color: #fcd34d; background: #fffbeb; }
+.answer--leak .answer__v { color: #b45309; }
+
+@media (min-width: 760px) {
+  .answers { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* ---------- Cartes ---------- */
+.page-analyse .card {
+  background: var(--color-surface); border: 1px solid var(--color-border);
+  border-radius: 16px; padding: 0.9rem 1rem; margin-bottom: 1rem;
+}
+.card__head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 0.6rem; margin-bottom: 0.7rem;
+}
+.card__head h2 { margin: 0; font-size: 0.97rem; font-weight: 700; }
+.card--leak { border-color: #fde68a; background: #fffdf5; }
+
+/* ---------- Catégories ---------- */
+.catlist { list-style: none; margin: 0; padding: 0; }
+.catrow { padding: 0.5rem 0; border-bottom: 1px solid var(--color-border); }
+.catrow:last-child { border-bottom: 0; padding-bottom: 0; }
+.catrow__head {
+  width: 100%; display: flex; justify-content: space-between; align-items: baseline;
+  gap: 0.6rem; background: none; border: 0; padding: 0; cursor: pointer;
+  font: inherit; color: inherit; text-align: left;
+}
+.catrow__name { font-size: 0.9rem; font-weight: 600; }
+.catrow__amount { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.catrow__bar {
+  height: 6px; border-radius: 999px; background: rgba(148,163,184,.22);
+  margin: 0.35rem 0 0.3rem; overflow: hidden;
+}
+.catrow__bar > span { display: block; height: 100%; border-radius: 999px; background: #166534; }
+.catrow__meta {
+  margin: 0; display: flex; justify-content: space-between; gap: 0.5rem;
+  font-size: 0.73rem;
+}
+.delta { font-weight: 700; white-space: nowrap; }
+.delta--up { color: #b91c1c; }
+.delta--down { color: #15803d; }
+.delta--new { color: var(--color-muted); font-weight: 600; }
+
+.catrow__items { list-style: none; margin: 0.55rem 0 0.2rem; padding: 0; }
+.catrow__items > li {
+  display: grid;
+  grid-template-columns: 3.6rem 1fr auto;
+  grid-template-areas: "date label sum" ". select select";
+  gap: 0.2rem 0.5rem; align-items: center;
+  padding: 0.4rem 0; border-top: 1px dashed var(--color-border);
+  font-size: 0.82rem;
+}
+.catrow__items > li > :nth-child(1) { grid-area: date; }
+.catrow__label { grid-area: label; overflow-wrap: anywhere; }
+.catrow__sum { grid-area: sum; font-variant-numeric: tabular-nums; font-weight: 600; }
+.catrow__select {
+  grid-area: select; justify-self: start;
+  font-size: 0.75rem; padding: 0.2rem 0.3rem;
+  border: 1px solid var(--color-border); border-radius: 8px;
+  background: var(--color-bg); color: var(--color-text); max-width: 100%;
+}
+.analyse__vs { margin: 0.7rem 0 0; }
+
+/* ---------- Natures ---------- */
+.natures { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.7rem; }
+.nature__top {
+  margin: 0 0 0.25rem; display: flex; justify-content: space-between;
+  font-size: 0.86rem; font-weight: 600;
+}
+.nature__top strong { font-variant-numeric: tabular-nums; }
+.nature__bar { height: 8px; border-radius: 999px; background: rgba(148,163,184,.2); overflow: hidden; }
+.nature__bar > span { display: block; height: 100%; border-radius: 999px; }
+.nature--fixe .nature__bar > span { background: #475569; }
+.nature--variable .nature__bar > span { background: #166534; }
+.nature--exceptionnel .nature__bar > span { background: #b45309; }
+.nature .small { margin: 0.15rem 0 0; }
+
+/* ---------- Tendance ---------- */
+.histo { overflow-x: auto; }
+.histo table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+.histo th, .histo td {
+  padding: 0.38rem 0.45rem; text-align: right; white-space: nowrap;
+  border-bottom: 1px solid var(--color-border); font-variant-numeric: tabular-nums;
+}
+.histo th { font-size: 0.72rem; color: var(--color-muted); font-weight: 600; }
+.histo th:first-child, .histo__name { text-align: left; white-space: normal; }
+.histo__name { font-weight: 600; }
+.histo tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- Fuites ---------- */
+.leaks { list-style: none; margin: 0; padding: 0; }
+.leaks > li {
+  display: grid; grid-template-columns: 3.6rem 1fr auto; gap: 0.5rem;
+  align-items: baseline; padding: 0.38rem 0;
+  border-bottom: 1px dashed var(--color-border); font-size: 0.83rem;
+}
+.leaks > li:last-child { border-bottom: 0; }
+.leaks strong { font-variant-numeric: tabular-nums; color: #b45309; }
