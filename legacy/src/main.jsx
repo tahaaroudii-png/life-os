@@ -1,3 +1,6 @@
+// En tout premier : une app qui n'arrive pas à joindre sa base doit
+// quand même pouvoir se mettre à jour.
+import './registerSW'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'

@@ -11,6 +11,9 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      // L'enregistrement est fait à la main dans main.jsx, pour pouvoir
+      // relancer la page quand une nouvelle version prend la main.
+      injectRegister: null,
       includeAssets: ['favicon.png', 'apple-touch-icon.png'],
       manifest: {
         name: 'Budget - Suivi personnel',
@@ -47,6 +50,7 @@ export default defineConfig({
         // pas par le cache HTTP.
         globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
         navigateFallbackDenylist: [/^\/rest\//, /^\/auth\//],
+        cleanupOutdatedCaches: true,
       },
       devOptions: {
         enabled: false,
