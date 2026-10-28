@@ -12,6 +12,11 @@ import { labelAccompli, estArabe } from '../../lib/goals'
  */
 export default function AnnualGoalsBar() {
   const { state } = useGoals()
+
+  // Tous les objectifs, sans exception : cet écran est le sien, et un
+  // objectif caché le matin est un objectif qui ne pèse pas sur la journée.
+  const visibles = useMemo(() => state?.goals || [], [state])
+
   if (visibles.length === 0) return null
 
   const card = state?.card || {}
