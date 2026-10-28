@@ -715,3 +715,33 @@ export function annualProgress(goal, deadline, ecomState) {
   // Milestone sans habitude : pas de progression calculable depuis les tâches
   return null
 }
+
+
+/**
+ * Les objectifs énoncés au passé, pour les relire depuis le 31 décembre.
+ *
+ * Un objectif au futur se repousse ; au passé il se constate. L'app les
+ * stocke tels que Tahar les a écrits — au présent — donc on garde ici la
+ * forme accomplie, par objectif. `goal.labelDone` l'emporte quand il
+ * existe, et à défaut de tout cela on retombe sur l'énoncé d'origine :
+ * mieux vaut la bonne phrase au présent qu'une tournure inventée.
+ */
+const ACCOMPLI = {
+  goal_salat: 'صليت كل صلاة في وقتها',
+  goal_hizb:  'حفظت ٣٠ حزب',
+  goal_body:  'بنيت جسداً قوياً منحوتاً',
+  goal_marti: 'لقيت مرتي',
+  goal_10k:   'J’ai atteint 10 000 $ de profit net par mois.',
+  goal_50k:   'J’ai dépassé 50 000 $ de chiffre d’affaires.',
+  goal_sante: 'Je suis apte physiquement.',
+}
+
+export function labelAccompli(goal) {
+  if (!goal) return ''
+  return goal.labelDone || ACCOMPLI[goal.id] || goal.labelAr || goal.label || ''
+}
+
+/** L'arabe se reconnaît à son écriture, pas au champ qui le porte. */
+export function estArabe(texte) {
+  return /[\u0600-\u06FF]/.test(texte || '')
+}

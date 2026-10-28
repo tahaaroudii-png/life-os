@@ -1,16 +1,14 @@
 import { useMemo, useState } from 'react'
 import { useGoals } from '../../hooks/useGoals'
-import { DOMAINS } from '../../lib/goals'
+import { labelAccompli, estArabe } from '../../lib/goals'
 
 /**
- * La page qu'on relit le matin.
+ * Les objectifs de l'année, relus depuis le 31 décembre.
  *
- * Ce n'est pas une liste de données : c'est ce que Tahar s'est promis,
- * dans ses mots, dont la moitié en arabe. D'où un panneau sombre — le
- * seul de l'écran — pour qu'on le lise avant les tâches ; l'arabe en
- * Amiri, à sa taille, parce que c'est le cœur de la chose ; et un filet
- * de couleur par domaine, qui porte une information plutôt qu'il ne
- * décore. Aucune mesure : elle vit sur la page Objectifs.
+ * Énoncés au passé et datés de la fin de l'année : on ne vise plus, on
+ * se souvient. C'est le seul rôle de ce bloc sur l'écran du matin — pas
+ * de jauge, pas de pourcentage, pas de case à cocher ; la mesure vit sur
+ * la page Objectifs.
  */
 export default function AnnualGoalsBar() {
   const { state } = useGoals()
@@ -27,22 +25,21 @@ export default function AnnualGoalsBar() {
   if (visibles.length === 0) return null
 
   const card = state?.card || {}
-  const annee = (card.deadline || '').slice(0, 4)
+  const dateFin = card.deadline
+    ? new Date(card.deadline + 'T12:00:00').toLocaleDateString('fr-FR',
+        { day: 'numeric', month: 'long', year: 'numeric' })
+    : null
 
   return (
     <section className="vow">
-      <p className="vow__question">{card.title || `Objectifs ${annee}`}</p>
+      {dateFin && <p className="vow__date">{dateFin}</p>}
 
       <ul className="vow__list">
         {visibles.map((g) => {
-          const arabe = !!g.labelAr
+          const texte = labelAccompli(g)
           return (
-            <li key={g.id} className="vow__item"
-                style={{ '--dom': DOMAINS[g.domain]?.light || 'currentColor' }}>
-              <p className={`vow__goal ${arabe ? 'is-ar' : ''}`} lang={arabe ? 'ar' : 'fr'}>
-                {g.labelAr || g.label}
-              </p>
-              {g.subtitle && <p className="vow__sub">{g.subtitle}</p>}
+            <li key={g.id} className={`vow__line ${estArabe(texte) ? 'is-ar' : ''}`}>
+              {texte}
             </li>
           )
         })}

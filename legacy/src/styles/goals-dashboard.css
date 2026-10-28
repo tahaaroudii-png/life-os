@@ -552,53 +552,39 @@
 .fund__detail dd.is-minus { color: var(--state-crit, #dc2626); }
 .fund__add { margin-top: 0.9rem; width: 100%; }
 
-/* ---- La page qu'on relit le matin ----
-   Un seul panneau sombre sur un écran clair : c'est ce qu'on lit
-   d'abord, et la seule audace de l'écran. ---- */
+/* ---- Le 31 décembre, au passé ----
+   Vert profond, l'arabe en Amiri à sa taille, une date en tête qui
+   déplace le lecteur à la fin de l'année. ---- */
 .vow {
-  margin: 0 0 1.25rem; padding: 1.5rem 1.4rem 1.3rem;
-  background: #101722; border-radius: 18px; color: #eef2f8;
+  margin: 0 0 1.25rem; padding: 1.75rem 1.4rem 1.4rem;
+  background: #0f2e1f; border-radius: 18px; color: #e9f4ee;
 }
-.vow__question {
-  margin: 0 0 1.2rem; font-size: 0.82rem; line-height: 1.45;
-  color: #8fa0b8; font-weight: 500; max-width: 34ch;
+.vow__date {
+  margin: 0 0 1.4rem; font-size: 0.64rem; letter-spacing: .24em;
+  text-transform: uppercase; color: #79ab93;
 }
 .vow__list { list-style: none; margin: 0; padding: 0; }
-
-.vow__item {
-  padding: 0.5rem 0 0.5rem 1rem;
-  border-left: 2px solid var(--dom);
-  margin-bottom: 0.7rem;
+.vow__line {
+  margin: 0 0 1rem; font-size: 1.06rem; font-weight: 500; line-height: 1.45;
+  overflow-wrap: anywhere;
 }
-.vow__item:last-child { margin-bottom: 0; }
-
-.vow__goal {
-  margin: 0; font-size: 1.12rem; font-weight: 600;
-  line-height: 1.35; letter-spacing: -0.01em; overflow-wrap: anywhere;
-}
-.vow__goal.is-ar {
+.vow__line:last-child { margin-bottom: 0; }
+.vow__line.is-ar {
   font-family: var(--ds-ar, 'Amiri', serif);
   font-size: 1.55rem; font-weight: 700; line-height: 1.5;
-  letter-spacing: 0;
-  /* L'ordre des caractères reste celui de l'arabe ; seul le bloc est
-     calé à gauche, pour que le texte et son sous-titre français
-     partagent la même marge au lieu de se renvoyer dos à dos. */
+  /* L'ordre des caractères reste celui de l'arabe ; le bloc est calé à
+     gauche pour que toutes les lignes partagent la même marge. */
   direction: rtl; text-align: left;
 }
-.vow__sub {
-  margin: 0.15rem 0 0; font-size: 0.78rem; line-height: 1.4; color: #7e90a8;
-}
-
 .vow__motto {
-  margin: 1.3rem 0 0; padding-top: 0.95rem;
-  border-top: 1px solid rgba(255,255,255,.1);
-  font-family: var(--ds-ar, serif); font-size: 0.95rem; font-style: italic;
-  color: #c3cedd; text-align: center;
+  margin: 1.6rem 0 0; padding-top: 1.1rem;
+  border-top: 1px solid rgba(255,255,255,.12);
+  font-family: var(--ds-ar, serif); font-style: italic; font-size: 0.92rem;
+  color: #9fc7b4; text-align: center;
 }
-
 .vow__toggle {
-  margin-top: 0.9rem; padding: 0; font: inherit; font-size: 0.78rem;
-  background: none; border: none; color: #8fa0b8; cursor: pointer;
+  margin-top: 1rem; padding: 0; font: inherit; font-size: 0.76rem;
+  background: none; border: none; color: #79ab93; cursor: pointer;
 }
-.vow__toggle:hover { color: #eef2f8; }
-.vow__toggle:focus-visible { outline: 2px solid #5b8ff9; outline-offset: 3px; border-radius: 3px; }
+.vow__toggle:hover { color: #e9f4ee; }
+.vow__toggle:focus-visible { outline: 2px solid #45b8a6; outline-offset: 3px; border-radius: 3px; }
