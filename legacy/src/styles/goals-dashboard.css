@@ -552,8 +552,3 @@
 .fund__detail dd.is-minus { color: var(--state-crit, #dc2626); }
 .fund__add { margin-top: 0.9rem; width: 100%; }
 
-/* ---- Le 31 décembre, au passé ----
-   Vert profond, l'arabe en Amiri à sa taille, une date en tête qui
-   déplace le lecteur à la fin de l'année. ---- */
-
-}
