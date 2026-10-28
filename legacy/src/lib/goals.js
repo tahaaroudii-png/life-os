@@ -731,9 +731,9 @@ const ACCOMPLI = {
   goal_hizb:  'حفظت ٣٠ حزب',
   goal_body:  'بنيت جسداً قوياً منحوتاً',
   goal_marti: 'لقيت مرتي',
-  goal_10k:   'J’ai atteint 10 000 $ de profit net par mois.',
-  goal_50k:   'J’ai dépassé 50 000 $ de chiffre d’affaires.',
-  goal_sante: 'Je suis apte physiquement.',
+  goal_10k:   'حققت ١٠ آلاف دولار ربحاً صافياً كل شهر',
+  goal_50k:   'تجاوزت ٥٠ ألف دولار من المبيعات',
+  goal_sante: 'أصبحت لائقاً بدنياً',
 }
 
 export function labelAccompli(goal) {
