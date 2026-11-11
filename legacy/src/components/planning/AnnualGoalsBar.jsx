@@ -1,6 +1,4 @@
-import { useMemo } from 'react'
-import { useGoals } from '../../hooks/useGoals'
-import { labelAccompli, estArabe } from '../../lib/goals'
+import { VOW, estArabe } from '../../lib/goals'
 import '../../styles/vow.css'
 
 /**
@@ -18,38 +16,25 @@ import '../../styles/vow.css'
  * phrases elles-mêmes.
  */
 export default function AnnualGoalsBar({ compact = false }) {
-  const { state } = useGoals()
+  if (VOW.length === 0) return null
 
-  // Tous les objectifs, sans exception : cet écran est le sien, et un
-  // objectif caché le matin est un objectif qui ne pèse pas sur la journée.
-  const visibles = useMemo(() => state?.goals || [], [state])
-
-  if (visibles.length === 0) return null
-
-  const card = state?.card || {}
   // La date de fin d'année, en tête : c'est elle qui met les phrases au
   // passé. « Tu ne vises plus, tu te souviens. »
-  const dateFin = card.deadline
-    ? new Date(card.deadline + 'T12:00:00')
-        .toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
-    : '31 décembre 2026'
+  const dateFin = '31 décembre 2026'
 
   return (
     <section className={`vow ${compact ? 'vow--compact' : ''}`}>
 
       {!compact && <p className="vow__date">{dateFin}</p>}
       <ul className="vow__list">
-        {visibles.map((g) => {
-          const texte = labelAccompli(g)
-          return (
-            <li key={g.id} className={`vow__line ${estArabe(texte) ? 'is-ar' : ''}`}>
-              {texte}
-            </li>
-          )
-        })}
+        {VOW.map(({ id, texte }) => (
+          <li key={id} className={`vow__line ${estArabe(texte) ? 'is-ar' : ''}`}>
+            {texte}
+          </li>
+        ))}
       </ul>
 
-      {!compact && card.motto && <p className="vow__motto">{card.motto}</p>}
+      {!compact && <p className="vow__motto">Believe and you shall receive</p>}
     </section>
   )
 }

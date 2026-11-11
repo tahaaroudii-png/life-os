@@ -726,19 +726,29 @@ export function annualProgress(goal, deadline, ecomState) {
  * existe, et à défaut de tout cela on retombe sur l'énoncé d'origine :
  * mieux vaut la bonne phrase au présent qu'une tournure inventée.
  */
-const ACCOMPLI = {
-  goal_salat: 'صليت كل صلاة في وقتها',
-  goal_hizb:  'حفظت ٣٠ حزب',
-  goal_body:  'بنيت جسداً قوياً منحوتاً',
-  goal_marti: 'لقيت مرتي',
-  goal_10k:   'حققت ١٠ آلاف دولار صافية شهرياً',
-  goal_50k:   'تجاوزت ٥٠ ألف دولار من المبيعات',
-  goal_sante: 'أصبحت لائقاً بدنياً',
-}
+/**
+ * Les sept phrases, dans l'ordre où il veut les relire, en darija.
+ *
+ * Elles ne sont plus tirées de l'état enregistré : celui-ci vit dans le
+ * navigateur, donc il différait d'un appareil à l'autre et une phrase
+ * retirée ici serait restée sur le téléphone. La liste fait foi, et elle
+ * est la même partout.
+ */
+export const VOW = [
+  { id: 'goal_salat', texte: 'صليت گاع الصلوات ف وقتها' },
+  { id: 'goal_marti', texte: 'لقيت مراتي' },
+  { id: 'goal_body',  texte: 'بنيت جسد قوي ومنحوت' },
+  { id: 'goal_hizb',  texte: 'راجعت القرآن كامل، ٣٠ حزب' },
+  { id: 'goal_10k',   texte: 'ربحت ١٠ آلاف دولار صافي كل شهر' },
+  { id: 'goal_dar',   texte: 'شريت شقة لوالدتي' },
+  { id: 'goal_sante', texte: 'ولّيت صحيح وفالفورمة' },
+]
+
+const ACCOMPLI = Object.fromEntries(VOW.map((v) => [v.id, v.texte]))
 
 export function labelAccompli(goal) {
   if (!goal) return ''
-  return goal.labelDone || ACCOMPLI[goal.id] || goal.labelAr || goal.label || ''
+  return ACCOMPLI[goal.id] || goal.labelDone || goal.labelAr || goal.label || ''
 }
 
 /** L'arabe se reconnaît à son écriture, pas au champ qui le porte. */
