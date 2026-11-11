@@ -53,23 +53,25 @@
 /* Dans la feuille d'ajout de tâche                                    */
 /* ------------------------------------------------------------------ */
 /*
- * Même promesse, mais posée au-dessus du champ qu'on remplit : elle ne
- * s'accroche plus en haut de l'écran, et elle cède la place dès qu'elle
- * risquerait de repousser le formulaire hors de vue.
+ * Même promesse, posée au-dessus du champ qu'on remplit. Elle s'accroche
+ * en haut de la FEUILLE, pas de la fenêtre : la feuille étant ce qui
+ * défile, une position statique la faisait remonter hors de vue dès les
+ * premiers champs — or c'est précisément en remplissant qu'il faut
+ * l'avoir sous les yeux.
  */
 .vow--compact {
-  position: static;
-  margin: 0 0 1rem;
-  padding: 0.7rem 0.85rem;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  margin: 0 0 0.9rem;
+  padding: 0.6rem 0.8rem;
   border-radius: 12px;
-  max-height: 34vh;
-  overflow-y: auto;
-  box-shadow: none;
+  box-shadow: 0 8px 16px -12px #000000a6;
 }
 .vow--compact .vow__line {
-  margin: 0 0 0.18rem;
-  font-size: 0.82rem; line-height: 1.35;
+  margin: 0 0 0.12rem;
+  font-size: 0.78rem; line-height: 1.3;
 }
 .vow--compact .vow__line.is-ar {
-  font-size: 0.97rem; line-height: 1.5;
+  font-size: 0.92rem; line-height: 1.45;
 }

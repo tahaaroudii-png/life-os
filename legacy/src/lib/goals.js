@@ -738,10 +738,10 @@ export const VOW = [
   { id: 'goal_salat', texte: 'صليت گاع الصلوات ف وقتها' },
   { id: 'goal_marti', texte: 'لقيت مراتي' },
   { id: 'goal_body',  texte: 'بنيت جسد قوي ومنحوت' },
-  { id: 'goal_hizb',  texte: 'راجعت القرآن كامل، ٣٠ حزب' },
+  { id: 'goal_hizb',  texte: 'حفظت القرآن كامل، ٣٠ حزب' },
   { id: 'goal_10k',   texte: 'ربحت ١٠ آلاف دولار صافي كل شهر' },
-  { id: 'goal_dar',   texte: 'شريت شقة لوالدتي' },
-  { id: 'goal_sante', texte: 'ولّيت صحيح وفالفورمة' },
+  { id: 'goal_dar',   texte: 'شريت شقة لميمتي' },
+  { id: 'goal_sante', texte: 'ولّيت قادر جنسياً' },
 ]
 
 const ACCOMPLI = Object.fromEntries(VOW.map((v) => [v.id, v.texte]))

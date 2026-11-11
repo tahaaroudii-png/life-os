@@ -614,7 +614,12 @@ label {
   max-height: 92dvh;
   overflow-y: auto;
   overscroll-behavior: contain;
+  /* Le rembourrage haut devient une marge du contenu, pour qu'un élément
+     accroché en haut de la feuille couvre toute sa largeur sans laisser
+     filer le formulaire dans une bande claire au-dessus de lui. */
+  padding-top: 0;
 }
+.modal-sheet > .modal-handle { margin-top: 1.25rem; }
 @media (min-width: 640px) {
   .modal-sheet {
     border-radius: var(--radius);
