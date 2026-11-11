@@ -48,3 +48,28 @@
   .vow__motto { display: none; }
   .vow__date { margin-bottom: 0.6rem; }
 }
+
+/* ------------------------------------------------------------------ */
+/* Dans la feuille d'ajout de tâche                                    */
+/* ------------------------------------------------------------------ */
+/*
+ * Même promesse, mais posée au-dessus du champ qu'on remplit : elle ne
+ * s'accroche plus en haut de l'écran, et elle cède la place dès qu'elle
+ * risquerait de repousser le formulaire hors de vue.
+ */
+.vow--compact {
+  position: static;
+  margin: 0 0 1rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 12px;
+  max-height: 34vh;
+  overflow-y: auto;
+  box-shadow: none;
+}
+.vow--compact .vow__line {
+  margin: 0 0 0.18rem;
+  font-size: 0.82rem; line-height: 1.35;
+}
+.vow--compact .vow__line.is-ar {
+  font-size: 0.97rem; line-height: 1.5;
+}

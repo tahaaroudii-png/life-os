@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { AXES, todayKey } from '../../lib/planning'
+import AnnualGoalsBar from './AnnualGoalsBar'
 
 /**
  * Modal "+", ouvert depuis la vue Aujourd'hui.
@@ -99,6 +100,10 @@ export default function QuickAddTaskModal({ open, onClose, onSubmit }) {
       <div className="modal-sheet" onClick={(e) => e.stopPropagation()}>
         <div className="modal-handle" />
         <h2 style={{ marginTop: 0 }}>Nouvelle tâche</h2>
+
+        {/* L'année devant les yeux au moment de décider : c'est ici que se
+            joue la journée, pas sur l'écran qu'on a déjà fait défiler. */}
+        <AnnualGoalsBar compact />
 
         <form onSubmit={handleSubmit}>
           <label>Type de tâche</label>

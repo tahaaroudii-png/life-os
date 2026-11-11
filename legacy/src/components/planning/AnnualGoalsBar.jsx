@@ -10,8 +10,14 @@ import '../../styles/vow.css'
  * se souvient. C'est le seul rôle de ce bloc sur l'écran du matin — pas
  * de jauge, pas de pourcentage, pas de case à cocher ; la mesure vit sur
  * la page Objectifs.
+ *
+ * `compact` : la même promesse, posée en tête du formulaire d'ajout de
+ * tâche. Elle ne s'accroche plus en haut de l'écran et laisse tomber la
+ * date et la devise — dans une feuille de saisie, la place appartient au
+ * champ qu'on remplit. Ne reste que ce qui doit peser sur le choix : les
+ * phrases elles-mêmes.
  */
-export default function AnnualGoalsBar() {
+export default function AnnualGoalsBar({ compact = false }) {
   const { state } = useGoals()
 
   // Tous les objectifs, sans exception : cet écran est le sien, et un
@@ -29,9 +35,9 @@ export default function AnnualGoalsBar() {
     : '31 décembre 2026'
 
   return (
-    <section className="vow">
+    <section className={`vow ${compact ? 'vow--compact' : ''}`}>
 
-      <p className="vow__date">{dateFin}</p>
+      {!compact && <p className="vow__date">{dateFin}</p>}
       <ul className="vow__list">
         {visibles.map((g) => {
           const texte = labelAccompli(g)
@@ -43,7 +49,7 @@ export default function AnnualGoalsBar() {
         })}
       </ul>
 
-      {card.motto && <p className="vow__motto">{card.motto}</p>}
+      {!compact && card.motto && <p className="vow__motto">{card.motto}</p>}
     </section>
   )
 }

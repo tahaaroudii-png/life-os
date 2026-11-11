@@ -607,6 +607,13 @@ label {
   max-width: 420px;
   border-radius: 18px 18px 0 0;
   padding: 1.25rem 1.5rem 1.75rem;
+  /* Une feuille plus haute que l'écran débordait par le haut : son titre
+     et ses premières lignes devenaient inatteignables, puisque rien ne
+     défilait. Elle se borne à la fenêtre et défile en elle-même. */
+  max-height: 92vh;
+  max-height: 92dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 @media (min-width: 640px) {
   .modal-sheet {
