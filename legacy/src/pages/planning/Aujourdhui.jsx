@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTasks } from '../../hooks/useTasks'
 import { useTaskLogs } from '../../hooks/useTaskLogs'
 import {
@@ -9,6 +9,7 @@ import {
   completionRate,
   streakForTask,
   todayKey,
+  toDateKey,
   AXIS_BY_KEY,
 } from '../../lib/planning'
 import { formatDateFR } from '../../lib/format'
@@ -63,6 +64,34 @@ export default function Aujourdhui() {
     () => buildDayTasks(tasks, logsByTaskId, today),
     [tasks, logsByTaskId, today]
   )
+
+  /*
+   * Rattrapage des tâches ponctuelles restées sans occurrence — une
+   * création interrompue entre les deux écritures, application fermée ou
+   * réseau coupé. Sans occurrence elles n'apparaissent nulle part, donc
+   * personne ne peut les réparer à la main : on leur pose la ligne
+   * manquante à leur date de création, une seule fois.
+   */
+  const repairedRef = useRef(new Set())
+  useEffect(() => {
+    if (tasksLoading || logsLoading) return
+    const withLog = new Set(logs.map((l) => l.task_id))
+    for (const t of tasks) {
+      if (t.type !== 'oneoff' || !t.active) continue
+      if (withLog.has(t.id)) continue
+      const createdKey = toDateKey(t.created_at)
+      // Hors de la fenêtre chargée, l'absence de log ne prouve rien.
+      if (createdKey < fromKey || createdKey > toKey) continue
+      if (repairedRef.current.has(t.id)) continue
+      repairedRef.current.add(t.id)
+      upsertLog
+        .mutateAsync({ task_id: t.id, log_date: createdKey, done: false, target_value: null })
+        .catch((err) => {
+          repairedRef.current.delete(t.id)
+          console.warn('Rattrapage occurrence KO :', err?.message || err)
+        })
+    }
+  }, [tasks, logs, tasksLoading, logsLoading, fromKey, toKey, upsertLog])
 
   const byAxis = useMemo(() => groupByAxis(dayItems), [dayItems])
 
@@ -126,6 +155,16 @@ export default function Aujourdhui() {
     }
   }
 
+  /**
+   * Créer une tâche ponctuelle, c'est DEUX écritures : la tâche, puis son
+   * occurrence du jour. Une tâche sans occurrence n'apparaît nulle part —
+   * `buildDayTasks` l'écarte — mais elle existe bel et bien en base. Si la
+   * seconde écriture échouait, la tâche était donc perdue en silence : rien
+   * à l'écran, rien à retenter, et l'impression que « rien ne s'ajoute ».
+   *
+   * On rend donc la création tout-ou-rien : l'occurrence manquée fait
+   * disparaître la tâche, et l'erreur remonte jusqu'au formulaire.
+   */
   async function handleAddTask(payload) {
     const task = await createTask.mutateAsync({
       title: payload.title,
@@ -136,19 +175,26 @@ export default function Aujourdhui() {
       daily_increment: payload.daily_increment ?? null,
       start_date: payload.start_date ?? null,
     })
-    if (payload.type === 'oneoff') {
-      // Le log_date colle à la date choisie dans le modal (par défaut : today,
-      // sinon la date future sélectionnée par l'utilisateur).
-      const targetDate = payload.oneoff_date || today
-      await upsertLog.mutateAsync({
-        task_id: task.id,
-        log_date: targetDate,
-        done: false,
-        target_value: null,
-      })
-    }
-    if (payload.type === 'habit' && payload.seed_days > 0) {
-      await backfillHabit.mutateAsync({ taskId: task.id, days: payload.seed_days })
+
+    try {
+      if (payload.type === 'oneoff') {
+        // Le log_date colle à la date choisie dans le modal (par défaut : today,
+        // sinon la date future sélectionnée par l'utilisateur).
+        const targetDate = payload.oneoff_date || today
+        await upsertLog.mutateAsync({
+          task_id: task.id,
+          log_date: targetDate,
+          done: false,
+          target_value: null,
+        })
+      }
+      if (payload.type === 'habit' && payload.seed_days > 0) {
+        await backfillHabit.mutateAsync({ taskId: task.id, days: payload.seed_days })
+      }
+    } catch (err) {
+      // Mieux vaut ne rien laisser qu'une tâche fantôme invisible.
+      try { await deleteTask.mutateAsync(task.id) } catch { /* au pire, la réparation ci-dessous la rattrape */ }
+      throw err
     }
   }
 

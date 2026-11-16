@@ -2,14 +2,24 @@ import { openDB } from 'idb'
 
 const DB_NAME = 'budget-offline'
 const STORE = 'pending-transactions'
+/*
+ * Les écritures que le serveur a définitivement refusées. Elles n'ont rien
+ * à faire dans la file d'attente : celle-ci suppose qu'un nouvel essai
+ * finira par passer, or une contrainte violée le sera encore demain. Elles
+ * y restaient donc à vie, réessayées et refusées à chaque démarrage.
+ */
+const REJECTED = 'rejected-transactions'
 
 let dbPromise = null
 function getDB() {
   if (!dbPromise) {
-    dbPromise = openDB(DB_NAME, 1, {
+    dbPromise = openDB(DB_NAME, 2, {
       upgrade(db) {
         if (!db.objectStoreNames.contains(STORE)) {
           db.createObjectStore(STORE, { keyPath: 'localId' })
+        }
+        if (!db.objectStoreNames.contains(REJECTED)) {
+          db.createObjectStore(REJECTED, { keyPath: 'localId' })
         }
       },
     })
@@ -42,4 +52,21 @@ export async function removeQueued(localId) {
 export async function countQueued() {
   const db = await getDB()
   return db.count(STORE)
+}
+
+/** Écarte un élément que le serveur refuse, en gardant de quoi l'examiner. */
+export async function markRejected(item, reason) {
+  const db = await getDB()
+  await db.put(REJECTED, { ...item, reason, rejectedAt: Date.now() })
+  await db.delete(STORE, item.localId)
+}
+
+export async function listRejected() {
+  const db = await getDB()
+  return db.getAll(REJECTED)
+}
+
+export async function dropRejected(localId) {
+  const db = await getDB()
+  await db.delete(REJECTED, localId)
 }
