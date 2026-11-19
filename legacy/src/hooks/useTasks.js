@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabaseClient'
 import { PLANNING_TABLES, addDays, todayKey } from '../lib/planning'
+import { abonnerPartage } from '../lib/realtimeShared'
 import { useAuth } from './useAuth'
 
 // Realtime activé pour le module Planning, mais toujours non bloquant
