@@ -1,0 +1,54 @@
+/*
+ * Les tâches essentielles.
+ *
+ * Elles gardent leur place dans l'ordre des heures : une journée se lit
+ * dans l'ordre où elle se vit, pas par ordre d'importance, et remonter ces
+ * lignes en tête rendrait le reste illisible. Ce qui les distingue est
+ * donc latéral — un liseré, un titre appuyé, un mot — et non leur rang.
+ */
+.task-line--essential {
+  position: relative;
+  padding-left: 0.5rem;
+  background: linear-gradient(90deg, rgba(22, 101, 52, .07), transparent 55%);
+  border-radius: 10px;
+}
+.task-line--essential::before {
+  content: '';
+  position: absolute; left: 0; top: 6px; bottom: 6px;
+  width: 3px; border-radius: 3px; background: #166534;
+}
+.task-line--essential .task-line__title { font-weight: 700; }
+
+.task-line__essential {
+  margin-left: 0.4rem; padding: 0.05rem 0.38rem;
+  font-size: 0.6rem; font-weight: 700; letter-spacing: .07em;
+  text-transform: uppercase; vertical-align: 1px;
+  color: #166534; background: #16653418; border-radius: 999px;
+  white-space: nowrap;
+}
+/* Faite, elle cesse de réclamer l'attention : la sobriété est la récompense. */
+.task-line--done.task-line--essential { background: none; }
+.task-line--done.task-line--essential::before { background: #94a3b8; }
+.task-line--done .task-line__essential { color: #64748b; background: #94a3b822; }
+
+/* Le compte du haut : un 80 % général peut cacher une prière manquée. */
+.today-header__essentials {
+  margin-top: 0.3rem; font-size: 0.72rem; color: var(--color-muted);
+}
+.today-header__essentials strong { color: #166534; }
+.today-header__essentials.is-complete { color: #166534; font-weight: 600; }
+
+/* La case à cocher, dans les deux feuilles où l'on crée ou revoit une tâche. */
+.essential-toggle {
+  display: flex; gap: 0.6rem; align-items: flex-start;
+  margin-top: 0.9rem; padding: 0.65rem 0.75rem;
+  border: 1px solid var(--color-border); border-radius: 12px;
+  cursor: pointer;
+}
+.essential-toggle input { margin-top: 0.15rem; width: 1.05rem; height: 1.05rem; flex: none; }
+.essential-toggle span { display: block; line-height: 1.35; }
+.essential-toggle strong { display: block; font-size: 0.88rem; }
+.essential-toggle em {
+  display: block; font-style: normal;
+  font-size: 0.74rem; color: var(--color-muted);
+}

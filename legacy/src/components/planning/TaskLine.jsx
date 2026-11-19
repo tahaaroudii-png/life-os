@@ -7,6 +7,11 @@ import { AXIS_BY_KEY, formatTimeHM } from '../../lib/planning'
  *   - l'heure prévue (si scheduled_time renseigné) — 2 lignes verticales : HH puis MM
  *   - sinon un tiret discret, pour préserver l'alignement de la colonne
  *
+ * Une tâche marquée essentielle porte un liseré et un titre appuyé : si
+ * tout le reste de la journée tombe, elle, non. L'ordre chronologique est
+ * conservé — remonter ces lignes en tête casserait la lecture de la
+ * journée, et une journée ne se lit pas par ordre d'importance.
+ *
  * L'axe est indiqué via un point de couleur à côté du titre.
  * L'objectif du défi progressif s'affiche à côté du titre ("Pompes : 25").
  */
@@ -26,7 +31,7 @@ export default function TaskLine({ item, dateKey, onToggle, onDelete, onPostpone
   }
 
   return (
-    <div className={`task-line ${done ? 'task-line--done' : ''}`}>
+    <div className={`task-line ${done ? 'task-line--done' : ''} ${task.essential ? 'task-line--essential' : ''}`}>
       {onEditTime ? (
         <button
           type="button"
@@ -66,6 +71,9 @@ export default function TaskLine({ item, dateKey, onToggle, onDelete, onPostpone
           />
           {task.title}
           {target != null && <span className="task-line__target"> : {target}</span>}
+          {task.essential && (
+            <span className="task-line__essential" title="Essentiel">essentiel</span>
+          )}
         </div>
         <div className="task-line__meta">
           {axis?.label}

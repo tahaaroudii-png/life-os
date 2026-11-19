@@ -26,6 +26,7 @@ export default function QuickAddTaskModal({ open, onClose, onSubmit }) {
   const [oneoffDate, setOneoffDate] = useState(todayKey())
   // Streak déjà pratiqué IRL avant l'installation — backfille N logs.
   const [seedDays, setSeedDays] = useState('0')
+  const [essential, setEssential] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [errorMsg, setErrorMsg] = useState(null)
 
@@ -41,6 +42,7 @@ export default function QuickAddTaskModal({ open, onClose, onSubmit }) {
     setStartDate(todayKey())
     setOneoffDate(todayKey())
     setSeedDays('0')
+    setEssential(false)
     setErrorMsg(null)
   }
 
@@ -76,6 +78,7 @@ export default function QuickAddTaskModal({ open, onClose, onSubmit }) {
         start_date: type === 'progressive' ? startDate : null,
         seed_days: type === 'habit' ? Math.max(0, Number(seedDays) || 0) : 0,
         oneoff_date: type === 'oneoff' ? (oneoffDate || todayKey()) : null,
+        essential,
       })
       reset()
       onClose()
@@ -252,6 +255,18 @@ export default function QuickAddTaskModal({ open, onClose, onSubmit }) {
               </button>
             ))}
           </div>
+
+          <label className="essential-toggle">
+            <input
+              type="checkbox"
+              checked={essential}
+              onChange={(e) => setEssential(e.target.checked)}
+            />
+            <span>
+              <strong>Essentielle</strong>
+              <em>Celle qui tient la journée debout, même si tout le reste tombe.</em>
+            </span>
+          </label>
 
           {errorMsg && <p className="error-text" style={{ marginTop: '0.75rem' }}>{errorMsg}</p>}
 

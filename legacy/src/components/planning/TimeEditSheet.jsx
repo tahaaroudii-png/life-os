@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 
 /**
- * Sheet minimaliste pour ajuster l'heure prévue d'une tâche (task.scheduled_time).
- * S'ouvre en tapant sur la zone horaire d'une tâche.
+ * Sheet minimaliste pour ajuster l'heure prévue d'une tâche (task.scheduled_time)
+ * et la marquer essentielle. S'ouvre en tapant sur la zone horaire d'une tâche :
+ * c'est le seul endroit où l'on revient sur une tâche déjà créée, donc c'est là
+ * que la bascule doit vivre.
  */
-export default function TimeEditSheet({ open, task, onSave, onClose }) {
+export default function TimeEditSheet({ open, task, onSave, onClose, onToggleEssential }) {
   const [time, setTime] = useState(task?.scheduled_time || '')
 
   useEffect(() => {
@@ -30,6 +32,20 @@ export default function TimeEditSheet({ open, task, onSave, onClose }) {
           onChange={(e) => setTime(e.target.value)}
           autoFocus
         />
+
+        {onToggleEssential && (
+          <label className="essential-toggle" style={{ marginTop: '1rem' }}>
+            <input
+              type="checkbox"
+              checked={!!task.essential}
+              onChange={(e) => onToggleEssential(task, e.target.checked)}
+            />
+            <span>
+              <strong>Essentielle</strong>
+              <em>Celle qui tient la journée debout, même si tout le reste tombe.</em>
+            </span>
+          </label>
+        )}
 
         <div className="modal-actions" style={{ marginTop: '1rem' }}>
           <button type="button" className="btn-ghost" onClick={onClose}>Annuler</button>

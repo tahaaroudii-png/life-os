@@ -13,6 +13,7 @@ import {
   AXIS_BY_KEY,
 } from '../../lib/planning'
 import { formatDateFR } from '../../lib/format'
+import '../../styles/essentiel.css'
 import TaskLine from '../../components/planning/TaskLine'
 import QuickAddTaskModal from '../../components/planning/QuickAddTaskModal'
 import AxisRing from '../../components/planning/AxisRing'
@@ -96,6 +97,10 @@ export default function Aujourdhui() {
   const byAxis = useMemo(() => groupByAxis(dayItems), [dayItems])
 
   const rate = completionRate(dayItems)
+  // Les essentielles ont leur propre compte : un 80 % général peut très bien
+  // cacher une prière manquée, et c'est justement ce qu'on veut voir.
+  const essentials = useMemo(() => dayItems.filter((it) => it.task.essential), [dayItems])
+  const essentialsDone = essentials.filter((it) => it.log?.done).length
   const doneCount = dayItems.filter((it) => it.log?.done).length
   const total = dayItems.length
 
@@ -252,6 +257,15 @@ export default function Aujourdhui() {
             <div className="today-header__bar" aria-hidden="true">
               <div className="today-header__bar-fill" style={{ width: `${Math.round(rate * 100)}%` }} />
             </div>
+            {essentials.length > 0 && (
+              <div
+                className={`today-header__essentials ${
+                  essentialsDone === essentials.length ? 'is-complete' : ''
+                }`}
+              >
+                Essentielles <strong>{essentialsDone}</strong> / {essentials.length}
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -396,6 +410,13 @@ export default function Aujourdhui() {
           if (!editTimeTask) return
           try { await updateTask.mutateAsync({ id: editTimeTask.id, scheduled_time: time }) }
           catch { /* silencieux */ }
+        }}
+        onToggleEssential={async (task, essential) => {
+          // On met à jour la feuille ouverte en même temps que la base, sinon
+          // la case retomberait à son ancien état le temps du aller-retour.
+          setEditTimeTask({ ...task, essential })
+          try { await updateTask.mutateAsync({ id: task.id, essential }) }
+          catch { setEditTimeTask({ ...task, essential: !essential }) }
         }}
         onClose={() => setEditTimeTask(null)}
       />

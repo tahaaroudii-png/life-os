@@ -77,6 +77,7 @@ export function useTasks() {
         daily_increment: num(payload.daily_increment),
         start_date: str(payload.start_date),
         scheduled_time: str(payload.scheduled_time),
+        essential: !!payload.essential,
       }
       const { data, error } = await supabase
         .from(PLANNING_TABLES.tasks)
