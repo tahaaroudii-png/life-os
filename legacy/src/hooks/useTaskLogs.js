@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabaseClient'
 import { PLANNING_TABLES } from '../lib/planning'
+import { abonnerPartage } from '../lib/realtimeShared'
 import { useAuth } from './useAuth'
 
 const REALTIME_ENABLED = true
@@ -35,36 +36,14 @@ export function useTaskLogs(fromKey, toKey) {
 
   useEffect(() => {
     if (!REALTIME_ENABLED || !user) return
-    let channel
-    try {
-      channel = supabase
-        .channel(`task-logs-${user.id}-${crypto.randomUUID()}`)
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: PLANNING_TABLES.taskLogs, filter: `user_id=eq.${user.id}` },
-          () => {
-            // On invalide toutes les plages de logs de cet user : la vue Aujourd'hui
-            // et la vue Historique se rechargent en cascade.
-            queryClient.invalidateQueries({ queryKey: ['task_logs', user.id] })
-          }
-        )
-        .subscribe((status, err) => {
-          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || err) {
-            console.warn('Realtime task_logs indisponible (non bloquant) :', err?.message || status)
-          }
-        })
-    } catch (err) {
-      console.warn('Realtime task_logs : abonnement KO (non bloquant) :', err?.message || err)
-    }
-    return () => {
-      if (channel) {
-        try {
-          supabase.removeChannel(channel)
-        } catch {
-          /* noop */
-        }
-      }
-    }
+    return abonnerPartage(`task-logs-${user.id}`, PLANNING_TABLES.taskLogs, user.id, () => {
+      // Pendant qu'une écriture est en vol, un rechargement renverrait
+      // l'état d'AVANT cette écriture et effacerait la case qu'on vient de
+      // cocher. La mutation invalide déjà tout une fois arrivée : on la
+      // laisse faire.
+      if (queryClient.isMutating() > 0) return
+      queryClient.invalidateQueries({ queryKey: ['task_logs', user.id] })
+    })
   }, [user, queryClient])
 
   /**
@@ -91,7 +70,10 @@ export function useTaskLogs(fromKey, toKey) {
     // Mise à jour optimiste : la case cochée réagit instantanément.
     onMutate: async (vars) => {
       const key = LOGS_RANGE_KEY(user?.id, fromKey, toKey)
-      await queryClient.cancelQueries({ queryKey: key })
+      // Toutes les plages, pas seulement la nôtre : une autre vue monte le
+      // même hook sur une fenêtre différente, et son rechargement en cours
+      // rapporterait l'état d'avant l'écriture.
+      await queryClient.cancelQueries({ queryKey: ['task_logs', user?.id] })
       const previous = queryClient.getQueryData(key)
       queryClient.setQueryData(key, (old = []) => {
         const others = old.filter((l) => !(l.task_id === vars.task_id && l.log_date === vars.log_date))
@@ -116,6 +98,28 @@ export function useTaskLogs(fromKey, toKey) {
       // Toutes les plages : la sync Objectifs lit une fenêtre annuelle
       // distincte de celle de la vue Aujourd'hui. Sans ça elle ne se
       // rafraîchissait qu'au focus ou via Realtime.
+      queryClient.invalidateQueries({ queryKey: ['task_logs', user?.id] })
+    },
+  })
+
+  /**
+   * Pose une occurrence SI elle manque, sans jamais toucher à une qui
+   * existe. Le rattrapage des tâches orphelines passe par ici : un upsert
+   * y écrirait `done: false` et décocherait une tâche déjà faite.
+   */
+  const insertLogIfMissing = useMutation({
+    mutationFn: async ({ task_id, log_date }) => {
+      const { data, error } = await supabase
+        .from(PLANNING_TABLES.taskLogs)
+        .upsert(
+          { user_id: user.id, task_id, log_date, done: false, target_value: null },
+          { onConflict: 'user_id,task_id,log_date', ignoreDuplicates: true }
+        )
+        .select()
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task_logs', user?.id] })
     },
   })
@@ -147,6 +151,7 @@ export function useTaskLogs(fromKey, toKey) {
     isLoading: query.isLoading,
     error: query.error,
     upsertLog,
+    insertLogIfMissing,
     postponeLog,
   }
 }

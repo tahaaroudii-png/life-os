@@ -46,7 +46,7 @@ export default function Aujourdhui() {
   // tous les besoins de la page en une seule requête.
   const fromKey = useMemo(() => addDays(today, -STREAK_WINDOW_DAYS), [today])
   const toKey = useMemo(() => addDays(today, UPCOMING_WINDOW_DAYS), [today])
-  const { logs, isLoading: logsLoading, upsertLog, postponeLog } = useTaskLogs(fromKey, toKey)
+  const { logs, isLoading: logsLoading, upsertLog, insertLogIfMissing, postponeLog } = useTaskLogs(fromKey, toKey)
   const [addOpen, setAddOpen] = useState(false)
   const [postponeItem, setPostponeItem] = useState(null)
   const [editTimeTask, setEditTimeTask] = useState(null)
@@ -85,14 +85,14 @@ export default function Aujourdhui() {
       if (createdKey < fromKey || createdKey > toKey) continue
       if (repairedRef.current.has(t.id)) continue
       repairedRef.current.add(t.id)
-      upsertLog
-        .mutateAsync({ task_id: t.id, log_date: createdKey, done: false, target_value: null })
+      insertLogIfMissing
+        .mutateAsync({ task_id: t.id, log_date: createdKey })
         .catch((err) => {
           repairedRef.current.delete(t.id)
           console.warn('Rattrapage occurrence KO :', err?.message || err)
         })
     }
-  }, [tasks, logs, tasksLoading, logsLoading, fromKey, toKey, upsertLog])
+  }, [tasks, logs, tasksLoading, logsLoading, fromKey, toKey, insertLogIfMissing])
 
   const byAxis = useMemo(() => groupByAxis(dayItems), [dayItems])
 

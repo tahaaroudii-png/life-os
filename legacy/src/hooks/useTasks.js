@@ -30,32 +30,10 @@ export function useTasks() {
 
   useEffect(() => {
     if (!REALTIME_ENABLED || !user) return
-    let channel
-    try {
-      channel = supabase
-        .channel(`tasks-${user.id}-${crypto.randomUUID()}`)
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: PLANNING_TABLES.tasks, filter: `user_id=eq.${user.id}` },
-          () => queryClient.invalidateQueries({ queryKey: TASKS_KEY(user.id) })
-        )
-        .subscribe((status, err) => {
-          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || err) {
-            console.warn('Realtime tasks indisponible (non bloquant) :', err?.message || status)
-          }
-        })
-    } catch (err) {
-      console.warn('Realtime tasks : abonnement KO (non bloquant) :', err?.message || err)
-    }
-    return () => {
-      if (channel) {
-        try {
-          supabase.removeChannel(channel)
-        } catch {
-          /* noop */
-        }
-      }
-    }
+    return abonnerPartage(`tasks-${user.id}`, PLANNING_TABLES.tasks, user.id, () => {
+      if (queryClient.isMutating() > 0) return
+      queryClient.invalidateQueries({ queryKey: TASKS_KEY(user.id) })
+    })
   }, [user, queryClient])
 
   const createTask = useMutation({
