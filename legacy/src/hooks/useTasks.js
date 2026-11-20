@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabaseClient'
 import { PLANNING_TABLES, addDays, todayKey } from '../lib/planning'
 import { abonnerPartage } from '../lib/realtimeShared'
+import { fetchAll } from '../lib/fetchAll'
 import { useAuth } from './useAuth'
 
 // Realtime activé pour le module Planning, mais toujours non bloquant
@@ -18,15 +19,13 @@ export function useTasks() {
   const query = useQuery({
     queryKey: TASKS_KEY(user?.id),
     enabled: !!user,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from(PLANNING_TABLES.tasks)
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: true })
-      if (error) throw error
-      return data
-    },
+    // Par tranches, comme les journaux : 293 tâches aujourd'hui, mais le
+    // plafond de 1000 se franchit sans prévenir et sans erreur.
+    queryFn: () =>
+      fetchAll(
+        () => supabase.from(PLANNING_TABLES.tasks).select('*').eq('user_id', user.id),
+        { ordre: { colonne: 'created_at' } }
+      ),
   })
 
   useEffect(() => {

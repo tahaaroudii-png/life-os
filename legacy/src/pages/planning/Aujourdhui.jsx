@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTasks } from '../../hooks/useTasks'
 import { useTaskLogs } from '../../hooks/useTaskLogs'
 import {
@@ -46,7 +46,7 @@ export default function Aujourdhui() {
   // tous les besoins de la page en une seule requête.
   const fromKey = useMemo(() => addDays(today, -STREAK_WINDOW_DAYS), [today])
   const toKey = useMemo(() => addDays(today, UPCOMING_WINDOW_DAYS), [today])
-  const { logs, isLoading: logsLoading, upsertLog, insertLogIfMissing, postponeLog } = useTaskLogs(fromKey, toKey)
+  const { logs, isLoading: logsLoading, upsertLog, postponeLog } = useTaskLogs(fromKey, toKey)
   const [addOpen, setAddOpen] = useState(false)
   const [postponeItem, setPostponeItem] = useState(null)
   const [editTimeTask, setEditTimeTask] = useState(null)
@@ -65,34 +65,6 @@ export default function Aujourdhui() {
     () => buildDayTasks(tasks, logsByTaskId, today),
     [tasks, logsByTaskId, today]
   )
-
-  /*
-   * Rattrapage des tâches ponctuelles restées sans occurrence — une
-   * création interrompue entre les deux écritures, application fermée ou
-   * réseau coupé. Sans occurrence elles n'apparaissent nulle part, donc
-   * personne ne peut les réparer à la main : on leur pose la ligne
-   * manquante à leur date de création, une seule fois.
-   */
-  const repairedRef = useRef(new Set())
-  useEffect(() => {
-    if (tasksLoading || logsLoading) return
-    const withLog = new Set(logs.map((l) => l.task_id))
-    for (const t of tasks) {
-      if (t.type !== 'oneoff' || !t.active) continue
-      if (withLog.has(t.id)) continue
-      const createdKey = toDateKey(t.created_at)
-      // Hors de la fenêtre chargée, l'absence de log ne prouve rien.
-      if (createdKey < fromKey || createdKey > toKey) continue
-      if (repairedRef.current.has(t.id)) continue
-      repairedRef.current.add(t.id)
-      insertLogIfMissing
-        .mutateAsync({ task_id: t.id, log_date: createdKey })
-        .catch((err) => {
-          repairedRef.current.delete(t.id)
-          console.warn('Rattrapage occurrence KO :', err?.message || err)
-        })
-    }
-  }, [tasks, logs, tasksLoading, logsLoading, fromKey, toKey, insertLogIfMissing])
 
   const byAxis = useMemo(() => groupByAxis(dayItems), [dayItems])
 

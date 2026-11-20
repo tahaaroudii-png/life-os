@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabaseClient'
 import { PLANNING_TABLES } from '../lib/planning'
 import { abonnerPartage } from '../lib/realtimeShared'
+import { fetchAll } from '../lib/fetchAll'
 import { useAuth } from './useAuth'
 
 const REALTIME_ENABLED = true
@@ -22,16 +23,18 @@ export function useTaskLogs(fromKey, toKey) {
   const query = useQuery({
     queryKey: LOGS_RANGE_KEY(user?.id, fromKey, toKey),
     enabled: !!user && !!fromKey && !!toKey,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from(PLANNING_TABLES.taskLogs)
-        .select('*')
-        .eq('user_id', user.id)
-        .gte('log_date', fromKey)
-        .lte('log_date', toKey)
-      if (error) throw error
-      return data
-    },
+    queryFn: () =>
+      // Par tranches : au-delà de 1000 lignes, une requête simple renvoie un
+      // échantillon et non la plage demandée.
+      fetchAll(
+        () => supabase
+          .from(PLANNING_TABLES.taskLogs)
+          .select('*')
+          .eq('user_id', user.id)
+          .gte('log_date', fromKey)
+          .lte('log_date', toKey),
+        { ordre: { colonne: 'log_date' } }
+      ),
   })
 
   useEffect(() => {
