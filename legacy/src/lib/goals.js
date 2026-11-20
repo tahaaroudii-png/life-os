@@ -741,7 +741,7 @@ export const VOW = [
   { id: 'goal_hizb',  texte: 'حفظت القرآن كامل، ٣٠ حزب' },
   { id: 'goal_10k',   texte: 'ربحت ١٠ آلاف دولار صافي كل شهر' },
   { id: 'goal_dar',   texte: 'شريت شقة لميمتي' },
-  { id: 'goal_sante', texte: 'ولّيت قادر جنسياً' },
+  { id: 'goal_sante', texte: 'أنا قادر نجيب وليدات' },
 ]
 
 const ACCOMPLI = Object.fromEntries(VOW.map((v) => [v.id, v.texte]))
