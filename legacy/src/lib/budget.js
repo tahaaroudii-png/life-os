@@ -31,8 +31,20 @@ export const DEPOSIT_PREFIX = '[APPORT] '
  */
 export const INCOME_PREFIX = '[AJOUT] '
 
+/**
+ * Reconnaît un préfixe technique dans une note.
+ *
+ * On compare sur le préfixe SANS son espace final : `depositNote('')`
+ * rendait « [APPORT] » puis coupait l'espace, et la lecture cherchait
+ * « [APPORT] » avec l'espace. Un versement sans libellé n'était donc plus
+ * reconnu par l'app qui venait de l'écrire — et comptait comme un retrait.
+ */
+function aPrefixe(note, prefixe) {
+  return typeof note === 'string' && note.trimStart().startsWith(prefixe.trim())
+}
+
 export function isIncome(tx) {
-  return typeof tx?.note === 'string' && tx.note.startsWith(INCOME_PREFIX)
+  return aPrefixe(tx?.note, INCOME_PREFIX)
 }
 
 export function incomeNote(userNote) {
@@ -47,7 +59,7 @@ export function spendValue(tx) {
 }
 
 export function isDeposit(tx) {
-  return typeof tx?.note === 'string' && tx.note.startsWith(DEPOSIT_PREFIX)
+  return aPrefixe(tx?.note, DEPOSIT_PREFIX)
 }
 
 export function depositNote(userNote) {
@@ -58,11 +70,13 @@ export function depositNote(userNote) {
 /** Le libellé sans son préfixe technique, pour l'affichage. */
 export function cleanNote(note) {
   if (typeof note !== 'string') return ''
-  return note.replace(DEPOSIT_PREFIX, '').replace(INCOME_PREFIX, '').replace(LOAN_PREFIX, '').trim()
+  let out = note
+  for (const p of [DEPOSIT_PREFIX, INCOME_PREFIX, LOAN_PREFIX]) out = out.replace(p.trim(), '')
+  return out.trim()
 }
 
 export function isLoan(tx) {
-  return typeof tx?.note === 'string' && tx.note.startsWith(LOAN_PREFIX)
+  return aPrefixe(tx?.note, LOAN_PREFIX)
 }
 
 export function loanNote(userNote) {
