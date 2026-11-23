@@ -3,15 +3,28 @@ import { useSettings } from '../hooks/useSettings'
 import { formatDH } from '../lib/format'
 import SetPinBanner from '../components/SetPinBanner'
 
+/*
+ * Les enveloppes se règlent en MONTANTS, plus en pourcentages : un
+ * pourcentage se déforme à chaque variation du salaire, alors qu'une
+ * enveloppe est une somme qu'on décide. Ce qui n'est attribué à aucune
+ * enveloppe reste hors budget — la daret, par exemple, qui part dès le
+ * virement.
+ */
 const FIELDS = [
   { key: 'monthly_income', label: 'Revenu mensuel (DH)', type: 'number' },
-  { key: 'pct_vie', label: 'Vie (%)', type: 'number' },
-  { key: 'pct_reinvest', label: 'Réinvestissement (%)', type: 'number' },
-  { key: 'pct_urgence', label: "Fond d'urgence (%)", type: 'number' },
-  { key: 'pct_divertissement', label: 'Divertissement (%)', type: 'number' },
+  { key: 'amt_vie', label: 'Vie (DH)', type: 'number', part: true },
+  { key: 'amt_reinvest', label: 'Réinvestissement (DH)', type: 'number', part: true },
+  { key: 'amt_urgence', label: "Fond d'urgence (DH)", type: 'number', part: true },
+  { key: 'amt_divertissement', label: 'Divertissement (DH)', type: 'number', part: true },
+  { key: 'amt_mariage', label: 'Mariage (DH)', type: 'number', part: true },
+  { key: 'amt_appart_mere', label: 'Appartement de ma mère (DH)', type: 'number', part: true },
   { key: 'emergency_goal', label: "Objectif du fond d'urgence (DH)", type: 'number' },
-  { key: 'start_month', label: 'Mois de départ du fond d’urgence', type: 'month' },
+  { key: 'goal_mariage', label: 'Objectif mariage (DH)', type: 'number' },
+  { key: 'goal_appart_mere', label: "Objectif appartement de ma mère (DH)", type: 'number' },
+  { key: 'start_month', label: 'Mois de départ des enveloppes d’épargne', type: 'month' },
 ]
+
+const PARTS = FIELDS.filter((f) => f.part).map((f) => f.key)
 
 function toMonthInputValue(dateLike) {
   if (!dateLike) return ''
@@ -35,11 +48,8 @@ export default function Reglages() {
 
   if (isLoading || !draft) return <p className="muted">Chargement…</p>
 
-  const pctTotal =
-    Number(draft.pct_vie || 0) +
-    Number(draft.pct_reinvest || 0) +
-    Number(draft.pct_urgence || 0) +
-    Number(draft.pct_divertissement || 0)
+  const totalParts = PARTS.reduce((somme, k) => somme + (Number(draft[k]) || 0), 0)
+  const horsBudget = (Number(draft.monthly_income) || 0) - totalParts
 
   function handleChange(key, value) {
     setDraft((d) => ({ ...d, [key]: value }))
@@ -47,14 +57,11 @@ export default function Reglages() {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    const patch = {
-      monthly_income: parseFloat(draft.monthly_income),
-      pct_vie: parseFloat(draft.pct_vie),
-      pct_reinvest: parseFloat(draft.pct_reinvest),
-      pct_urgence: parseFloat(draft.pct_urgence),
-      pct_divertissement: parseFloat(draft.pct_divertissement),
-      emergency_goal: parseFloat(draft.emergency_goal),
-      start_month: draft.start_month ? `${draft.start_month}-01` : null,
+    const nombre = (v) => (v === '' || v == null || Number.isNaN(parseFloat(v)) ? null : parseFloat(v))
+    const patch = { start_month: draft.start_month ? `${draft.start_month}-01` : null }
+    for (const f of FIELDS) {
+      if (f.type === 'month') continue
+      patch[f.key] = nombre(draft[f.key])
     }
     await updateSettings.mutateAsync(patch)
     setSavedMsg(true)
@@ -65,9 +72,10 @@ export default function Reglages() {
     <div className="page-reglages">
       <h1>Réglages</h1>
       <p className="muted">
-        Revenu mensuel de référence : <strong>{formatDH(settings.monthly_income)}</strong>. Les 3
-        enveloppes Vie / Réinvestissement / Divertissement repartent à zéro chaque mois ; le fond
-        d'urgence cumule jusqu'à l'objectif.
+        Revenu mensuel de référence : <strong>{formatDH(settings.monthly_income)}</strong>. Vie,
+        Réinvestissement et Divertissement repartent à zéro le 20 de chaque mois ; le fond
+        d'urgence, le mariage et l'appartement cumulent jusqu'à leur objectif et acceptent des
+        versements. Ce qui n'est attribué à aucune enveloppe reste hors budget.
       </p>
 
       <form className="settings-form" onSubmit={handleSubmit}>
@@ -84,8 +92,10 @@ export default function Reglages() {
           </div>
         ))}
 
-        <p className={pctTotal === 100 ? 'muted' : 'error-text'}>
-          Total des pourcentages : {pctTotal}% {pctTotal !== 100 && '(devrait être 100%)'}
+        <p className={horsBudget < 0 ? 'error-text' : 'muted'}>
+          Réparti : <strong>{formatDH(totalParts)}</strong>
+          {horsBudget > 0 && <> · hors budget : <strong>{formatDH(horsBudget)}</strong> (daret, etc.)</>}
+          {horsBudget < 0 && <> · dépasse le revenu de <strong>{formatDH(-horsBudget)}</strong></>}
         </p>
 
         <button type="submit" className="btn-primary" disabled={updateSettings.isPending}>
@@ -111,4 +121,4 @@ export default function Reglages() {
   )
 }
 
-const BUILD_DATE = '20 novembre 2026 — 07h05'
+const BUILD_DATE = '23 novembre 2026'

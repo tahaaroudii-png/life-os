@@ -134,9 +134,55 @@ export function allocationFor(settings, envelopeKey) {
   if (!settings) return 0
   const env = ENVELOPES.find((e) => e.key === envelopeKey)
   if (!env) return 0
+  // Le montant fixe fait foi ; le pourcentage n'est plus qu'un héritage,
+  // utilisé tant qu'aucun montant n'a été posé pour cette enveloppe.
+  if (env.amtField && settings[env.amtField] != null && settings[env.amtField] !== '') {
+    return Number(settings[env.amtField]) || 0
+  }
+  if (!env.pctField) return 0
   const income = Number(settings.monthly_income) || 0
   const pct = Number(settings[env.pctField]) || 0
   return (income * pct) / 100
+}
+
+/**
+ * L'état d'une enveloppe d'épargne : ce qu'elle a accumulé, son objectif,
+ * et ce qu'il reste à parcourir. Même calcul que le fond d'urgence, mais
+ * pour n'importe laquelle — mariage, appartement, urgence.
+ */
+export function computeSavingState(settings, envelopeKey, transactions, now = new Date()) {
+  const env = ENVELOPES.find((e) => e.key === envelopeKey)
+  if (!settings || !env) return null
+
+  const goal = Number(settings[env.goalField]) || 0
+  const monthlyAllocation = allocationFor(settings, envelopeKey)
+  const start = settings.start_month ? new Date(settings.start_month) : startOfMonth(now)
+  const monthsElapsed = monthsBetweenInclusive(start, now)
+  const totalAllocated = monthsElapsed * monthlyAllocation
+
+  let totalDeposited = 0
+  let totalSpent = 0
+  for (const tx of transactions) {
+    if (tx.envelope !== envelopeKey) continue
+    const amount = Number(tx.amount || 0)
+    if (isDeposit(tx)) totalDeposited += Math.abs(amount)
+    else totalSpent += amount
+  }
+
+  const cumulated = Math.max(0, totalAllocated + totalDeposited - totalSpent)
+  const percent = goal > 0 ? Math.min(100, (cumulated / goal) * 100) : 0
+  let monthsRemaining = null
+  if (goal > 0 && cumulated < goal && monthlyAllocation > 0) {
+    monthsRemaining = Math.ceil((goal - cumulated) / monthlyAllocation)
+  } else if (goal > 0 && cumulated >= goal) {
+    monthsRemaining = 0
+  }
+
+  return {
+    key: env.key, label: env.label, icone: env.icone,
+    cumulated, goal, percent, monthsRemaining, monthlyAllocation,
+    totalAllocated, totalDeposited, totalSpent,
+  }
 }
 
 /**

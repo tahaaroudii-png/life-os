@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ENVELOPES } from '../lib/schema'
+import { ENVELOPES, SAVING_ENVELOPES } from '../lib/schema'
 import { loanNote, depositNote, incomeNote } from '../lib/budget'
 import { useTransactions } from '../hooks/useTransactions'
 
@@ -55,7 +55,11 @@ export default function QuickAddModal({ open, onClose, defaultEnvelope }) {
     let finalNote = note
     if (type === 'loan') finalNote = loanNote(note)
     else if (type === 'income') {
-      finalNote = envelope === 'urgence' ? depositNote(note) : incomeNote(note)
+      // Un ajout sur une enveloppe d'épargne est un VERSEMENT (il la fait
+      // monter vers son objectif) ; sur une enveloppe qui repart à zéro,
+      // c'est une rentrée d'argent du mois.
+      const epargne = SAVING_ENVELOPES.some((e) => e.key === envelope)
+      finalNote = epargne ? depositNote(note) : incomeNote(note)
     }
 
     const result = await addTransaction.mutateAsync({

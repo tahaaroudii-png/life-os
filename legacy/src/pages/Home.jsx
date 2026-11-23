@@ -1,15 +1,18 @@
 import { useMemo, useState } from 'react'
 import { useSettings } from '../hooks/useSettings'
 import { useTransactions } from '../hooks/useTransactions'
-import { computeMonthlyEnvelopeStates, computeEmergencyFundState, totalLoans, startOfMonth, startOfNextMonth, SALARY_DAY } from '../lib/budget'
+import { computeMonthlyEnvelopeStates, computeSavingState, totalLoans, startOfMonth, startOfNextMonth, SALARY_DAY } from '../lib/budget'
+import { SAVING_ENVELOPES } from '../lib/schema'
 import BudgetRing from '../components/BudgetRing'
 import NewSalaryModal from '../components/NewSalaryModal'
 import QuickAddModal from '../components/QuickAddModal'
+import SavingCard from '../components/SavingCard'
 import { formatDH, formatPercent } from '../lib/format'
 
 export default function Home() {
   const [salaryOpen, setSalaryOpen] = useState(false)
-  const [fundOpen, setFundOpen] = useState(false)
+  // Porte la clé de l'enveloppe sur laquelle on verse, ou null.
+  const [fundOpen, setFundOpen] = useState(null)
   const { settings, isLoading: settingsLoading } = useSettings()
   const { transactions, isLoading: txLoading } = useTransactions()
 
@@ -18,8 +21,12 @@ export default function Home() {
     [settings, transactions]
   )
 
-  const urgenceTx = useMemo(() => transactions.filter((t) => t.envelope === 'urgence'), [transactions])
-  const emergency = useMemo(() => computeEmergencyFundState(settings, urgenceTx), [settings, urgenceTx])
+  const savings = useMemo(
+    () => SAVING_ENVELOPES
+      .map((e) => computeSavingState(settings, e.key, transactions))
+      .filter(Boolean),
+    [settings, transactions]
+  )
 
   // Prêts sur salaire M+1 : total du mois courant, à rembourser au prochain salaire
   const monthLoans = useMemo(() => {
@@ -87,57 +94,17 @@ export default function Home() {
         ))}
       </div>
 
-      <section className="fund">
-        <header className="fund__head">
-          <h2>Fond d’urgence</h2>
-          <span className="fund__pct">{formatPercent(emergency.percent)}</span>
-        </header>
+      {/* Chaque enveloppe d'épargne a sa carte et son versement : verser
+          sur le mariage ne doit pas obliger à passer par le fond d'urgence. */}
+      {savings.map((state) => (
+        <SavingCard key={state.key} state={state} onVerser={() => setFundOpen(state.key)} />
+      ))}
 
-        {/* Le solde en grand : c'est le seul chiffre qu'il vient chercher. */}
-        <p className="fund__amount">
-          {formatDH(emergency.cumulated)}
-          <span> sur {formatDH(emergency.goal)}</span>
-        </p>
-
-        <div className="fund__track">
-          <div className="fund__fill" style={{ width: `${Math.min(100, emergency.percent)}%` }} />
-        </div>
-
-        <p className="fund__eta">
-          {emergency.monthsRemaining === 0
-            ? 'Objectif atteint.'
-            : emergency.monthsRemaining
-            ? `Au rythme actuel, atteint dans ${emergency.monthsRemaining} mois.`
-            : 'Fixe un objectif dans Réglages pour suivre la progression.'}
-        </p>
-
-        {/* D'où sort ce total. Un solde sans sa composition ne se vérifie
-            pas : quand il paraît faux, on ne sait pas quoi corriger. */}
-        <dl className="fund__detail">
-          <div>
-            <dt>Mis de côté chaque mois</dt>
-            <dd>{formatDH(emergency.totalAllocated)}</dd>
-          </div>
-          <div>
-            <dt>Versements</dt>
-            <dd className={emergency.totalDeposited > 0 ? 'is-plus' : ''}>
-              {emergency.totalDeposited > 0 ? `+ ${formatDH(emergency.totalDeposited)}` : '—'}
-            </dd>
-          </div>
-          <div>
-            <dt>Retraits</dt>
-            <dd className={emergency.totalSpent > 0 ? 'is-minus' : ''}>
-              {emergency.totalSpent > 0 ? `− ${formatDH(emergency.totalSpent)}` : '—'}
-            </dd>
-          </div>
-        </dl>
-
-        <button type="button" className="btn-secondary fund__add" onClick={() => setFundOpen(true)}>
-          Verser une somme
-        </button>
-      </section>
-
-      <QuickAddModal open={fundOpen} onClose={() => setFundOpen(false)} defaultEnvelope="urgence" />
+      <QuickAddModal
+        open={fundOpen !== null}
+        onClose={() => setFundOpen(null)}
+        defaultEnvelope={fundOpen || 'urgence'}
+      />
     </div>
   )
 }
