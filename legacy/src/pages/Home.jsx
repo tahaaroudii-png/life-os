@@ -3,10 +3,9 @@ import { useSettings } from '../hooks/useSettings'
 import { useTransactions } from '../hooks/useTransactions'
 import { computeMonthlyEnvelopeStates, computeSavingState, totalLoans, startOfMonth, startOfNextMonth, SALARY_DAY } from '../lib/budget'
 import { SAVING_ENVELOPES } from '../lib/schema'
-import BudgetRing from '../components/BudgetRing'
 import NewSalaryModal from '../components/NewSalaryModal'
 import QuickAddModal from '../components/QuickAddModal'
-import SavingCard from '../components/SavingCard'
+import EnvelopeCard from '../components/EnvelopeCard'
 import { formatDH, formatPercent } from '../lib/format'
 
 export default function Home() {
@@ -85,19 +84,17 @@ export default function Home() {
       )}
 
       <p className="muted page-home__subtitle">
-        Tape un cercle pour basculer entre <strong>consommé</strong> et <strong>restant</strong>.
+        Tape une carte pour voir d'où sort son montant.
       </p>
 
-      <div className="budget-rings">
-        {monthlyStates.map((state) => (
-          <BudgetRing key={state.key} {...state} />
-        ))}
-      </div>
-
-      {/* Chaque enveloppe d'épargne a sa carte et son versement : verser
-          sur le mariage ne doit pas obliger à passer par le fond d'urgence. */}
+      {/* Les six enveloppes sous la même forme : celles qui repartent à zéro
+          le 20 d'abord, celles qui s'accumulent ensuite. Chacune a son bouton,
+          pour que verser sur le mariage n'oblige pas à passer par l'urgence. */}
+      {monthlyStates.map((state) => (
+        <EnvelopeCard key={state.key} state={state} onAction={() => setFundOpen(state.key)} />
+      ))}
       {savings.map((state) => (
-        <SavingCard key={state.key} state={state} onVerser={() => setFundOpen(state.key)} />
+        <EnvelopeCard key={state.key} state={state} onAction={() => setFundOpen(state.key)} />
       ))}
 
       <QuickAddModal

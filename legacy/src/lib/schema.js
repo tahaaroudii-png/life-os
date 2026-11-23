@@ -23,11 +23,16 @@
  * zéro le 20, elle s'accumule vers un objectif (`goalField`) et accepte
  * des versements.
  */
+/*
+ * Le fond d'urgence a été retiré de la liste à sa demande. Sa clé reste
+ * acceptée par la base et `ENVELOPE_LABELS` la connaît encore, pour que
+ * ses anciennes transactions restent lisibles dans l'historique — on ne
+ * supprime pas un passé parce qu'on ferme une enveloppe.
+ */
 export const ENVELOPES = [
   { key: 'vie', label: 'Vie', pctField: 'pct_vie', amtField: 'amt_vie', resets: true },
   { key: 'reinvest', label: 'Réinvestissement', pctField: 'pct_reinvest', amtField: 'amt_reinvest', resets: true },
   { key: 'divertissement', label: 'Divertissement', pctField: 'pct_divertissement', amtField: 'amt_divertissement', resets: true },
-  { key: 'urgence', label: "Fond d'urgence", pctField: 'pct_urgence', amtField: 'amt_urgence', resets: false, goalField: 'emergency_goal', icone: '🛟' },
   { key: 'mariage', label: 'Mariage', amtField: 'amt_mariage', resets: false, goalField: 'goal_mariage', icone: '💍' },
   { key: 'appart_mere', label: 'Appartement de ma mère', amtField: 'amt_appart_mere', resets: false, goalField: 'goal_appart_mere', icone: '🏠' },
 ]
@@ -35,7 +40,10 @@ export const ENVELOPES = [
 /** Les enveloppes qui s'accumulent et acceptent des versements. */
 export const SAVING_ENVELOPES = ENVELOPES.filter((e) => !e.resets)
 
-export const ENVELOPE_LABELS = Object.fromEntries(ENVELOPES.map((e) => [e.key, e.label]))
+export const ENVELOPE_LABELS = {
+  ...Object.fromEntries(ENVELOPES.map((e) => [e.key, e.label])),
+  urgence: "Fond d'urgence (clôturé)",
+}
 
 export const TABLES = {
   transactions: 'transactions',

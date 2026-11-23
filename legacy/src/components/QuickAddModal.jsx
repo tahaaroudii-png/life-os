@@ -26,6 +26,7 @@ export default function QuickAddModal({ open, onClose, defaultEnvelope }) {
   const { addTransaction } = useTransactions()
   const [amount, setAmount] = useState('')
   const [envelope, setEnvelope] = useState(defaultEnvelope || ENVELOPES[0].key)
+  const epargneChoisie = SAVING_ENVELOPES.some((e) => e.key === envelope)
   const [note, setNote] = useState('')
   const [type, setType] = useState('expense')
   const [submitting, setSubmitting] = useState(false)
@@ -58,8 +59,7 @@ export default function QuickAddModal({ open, onClose, defaultEnvelope }) {
       // Un ajout sur une enveloppe d'épargne est un VERSEMENT (il la fait
       // monter vers son objectif) ; sur une enveloppe qui repart à zéro,
       // c'est une rentrée d'argent du mois.
-      const epargne = SAVING_ENVELOPES.some((e) => e.key === envelope)
-      finalNote = epargne ? depositNote(note) : incomeNote(note)
+      finalNote = epargneChoisie ? depositNote(note) : incomeNote(note)
     }
 
     const result = await addTransaction.mutateAsync({
@@ -146,7 +146,7 @@ export default function QuickAddModal({ open, onClose, defaultEnvelope }) {
           {type === 'income' && (
             <p className="muted small" style={{ marginTop: '0.5rem' }}>
               💰 Ajoute au restant de l'enveloppe. Sur "{ENVELOPES.find((e) => e.key === envelope)?.label}",
-              cela {envelope === 'urgence' ? 'renforce le fond d\'urgence' : 'augmente le budget restant du mois'}.
+              cela {epargneChoisie ? 'fait monter cette enveloppe vers son objectif' : 'augmente le budget restant du mois'}.
             </p>
           )}
 

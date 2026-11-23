@@ -2,7 +2,7 @@ import { useMemo, useState, useSyncExternalStore } from 'react'
 import { useSettings } from '../hooks/useSettings'
 import { useTransactions } from '../hooks/useTransactions'
 import {
-  computeEmergencyFundState, computeEmergencyFundHistory, cleanNote,
+  cleanNote,
 } from '../lib/budget'
 import {
   computeFloor, computeDailyLeft, computeLeaks, comparePeriods, byNature, categoryHistory,
@@ -10,7 +10,6 @@ import {
 import { CATEGORIES, DIVERS, setOverride, categoryOf } from '../lib/categories'
 import { formatDH } from '../lib/format'
 import { TX_COLS } from '../lib/schema'
-import EmergencyFundChart from '../components/charts/EmergencyFundChart'
 import '../styles/analyse.css'
 
 /* Les corrections de catégorie vivent dans le navigateur ; on les relit
@@ -43,11 +42,6 @@ export default function Dashboard() {
   const natures = useMemo(() => byNature(compare.rows), [compare])
   const history = useMemo(() => categoryHistory(transactions, overrides, 4), [transactions, overrides])
 
-  const urgenceTx = useMemo(() => transactions.filter((t) => t.envelope === 'urgence'), [transactions])
-  const emergency = useMemo(() => computeEmergencyFundState(settings, urgenceTx), [settings, urgenceTx])
-  const emergencyHistory = useMemo(
-    () => computeEmergencyFundHistory(settings, urgenceTx, 6), [settings, urgenceTx]
-  )
 
   if (settingsLoading || txLoading) return <p className="muted">Chargement…</p>
   if (!settings) return <p className="error-text">Aucun réglage trouvé pour ce compte.</p>
@@ -239,14 +233,7 @@ export default function Dashboard() {
         </section>
       )}
 
-      {/* ---------- Fond d'urgence ---------- */}
-      <section className="card">
-        <div className="card__head">
-          <h2>Fond d'urgence</h2>
-          <span className="muted small">{formatDH(emergency.cumulated)} / {formatDH(emergency.goal)}</span>
-        </div>
-        <EmergencyFundChart history={emergencyHistory} goal={emergency.goal} />
-      </section>
+
     </div>
   )
 }
