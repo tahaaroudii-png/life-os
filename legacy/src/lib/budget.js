@@ -203,7 +203,7 @@ export function computeSavingState(settings, envelopeKey, transactions, now = ne
   }
 
   return {
-    key: env.key, label: env.label, icone: env.icone,
+    key: env.key, label: env.label, icone: env.icone, source: env.source,
     cumulated, goal, percent, monthsRemaining, monthlyAllocation,
     totalDeposited, totalSpent,
   }

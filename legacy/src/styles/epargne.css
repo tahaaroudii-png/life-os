@@ -67,3 +67,18 @@
   .saving__pct { font-size: 1.35rem; bottom: 12px; }
   .saving__amount { font-size: 1.55rem; }
 }
+
+/* L'origine de l'argent et l'apport mensuel, sur la carte plutôt que
+   dans les Réglages. Assez grands pour se lire d'un coup d'œil. */
+.saving__tags {
+  display: flex; flex-wrap: wrap; gap: 0.3rem;
+  margin: 0.3rem 0 0.1rem;
+}
+.saving__tag {
+  display: inline-block;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  background: #ffffff2b;
+  font-size: 0.74rem; font-weight: 700;
+  letter-spacing: 0.02em; white-space: nowrap;
+}

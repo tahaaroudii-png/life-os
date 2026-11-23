@@ -121,4 +121,4 @@ export default function Reglages() {
   )
 }
 
-const BUILD_DATE = '23 novembre 2026 — 17h'
+const BUILD_DATE = '23 novembre 2026 — 17h30'

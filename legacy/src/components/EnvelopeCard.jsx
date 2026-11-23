@@ -78,6 +78,19 @@ export default function EnvelopeCard({ state, onAction }) {
 
         <span className="saving__body">
           <span className="saving__name">{state.icone ? `${state.icone} ` : ''}{state.label}</span>
+
+          {/* D'où vient l'argent, et combien il en tombe chaque mois. Deux
+              repères qu'on cherchait jusqu'ici dans les Réglages. */}
+          {epargne && (state.source || state.monthlyAllocation > 0) && (
+            <span className="saving__tags">
+              {state.source && <span className="saving__tag">{state.source}</span>}
+              {state.monthlyAllocation > 0 && (
+                <span className="saving__tag">
+                  Apport mensuel {formatDH(state.monthlyAllocation)}
+                </span>
+              )}
+            </span>
+          )}
           <span className="saving__amount">{formatDH(grandChiffre)}</span>
           <span className="saving__goal">{sousTitre}</span>
           {epargne && state.monthsRemaining != null && (

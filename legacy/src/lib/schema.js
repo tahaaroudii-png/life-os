@@ -34,7 +34,9 @@ export const ENVELOPES = [
   { key: 'reinvest', label: 'Réinvestissement', pctField: 'pct_reinvest', amtField: 'amt_reinvest', resets: true },
   { key: 'divertissement', label: 'Divertissement', pctField: 'pct_divertissement', amtField: 'amt_divertissement', resets: true },
   { key: 'mariage', label: 'Mariage', amtField: 'amt_mariage', resets: false, goalField: 'goal_mariage', icone: '💍' },
-  { key: 'appart_mere', label: 'Appartement de ma mère', amtField: 'amt_appart_mere', resets: false, goalField: 'goal_appart_mere', icone: '🏠' },
+  // `source` nomme d'où vient l'argent : l'appartement est alimenté par
+  // la daret, et le voir évite de chercher pourquoi la somme tombe.
+  { key: 'appart_mere', label: 'Appartement de ma mère', amtField: 'amt_appart_mere', resets: false, goalField: 'goal_appart_mere', icone: '🏠', source: 'DARET' },
 ]
 
 /** Les enveloppes qui s'accumulent et acceptent des versements. */
