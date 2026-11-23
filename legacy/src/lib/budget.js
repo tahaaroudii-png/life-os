@@ -170,9 +170,6 @@ export function computeSavingState(settings, envelopeKey, transactions, now = ne
 
   const goal = Number(settings[env.goalField]) || 0
   const monthlyAllocation = allocationFor(settings, envelopeKey)
-  const start = settings.start_month ? new Date(settings.start_month) : startOfMonth(now)
-  const monthsElapsed = monthsBetweenInclusive(start, now)
-  const totalAllocated = monthsElapsed * monthlyAllocation
 
   let totalDeposited = 0
   let totalSpent = 0
@@ -183,8 +180,21 @@ export function computeSavingState(settings, envelopeKey, transactions, now = ne
     else totalSpent += amount
   }
 
-  const cumulated = Math.max(0, totalAllocated + totalDeposited - totalSpent)
+  /*
+   * Une enveloppe contient ce qu'on y a RÉELLEMENT versé.
+   *
+   * Elle créditait auparavant l'allocation mensuelle × les mois écoulés,
+   * comme si la somme y tombait d'elle-même : l'appartement affichait
+   * 6000 DH alors que rien n'y avait été mis. Un solde qu'on n'a pas
+   * sur son compte n'est pas une épargne, c'est une intention — et s'y
+   * fier conduit à croire qu'on a de quoi payer.
+   *
+   * Le montant mensuel reste le plan : il sert à dire dans combien de
+   * mois l'objectif tombe si l'on s'y tient.
+   */
+  const cumulated = Math.max(0, totalDeposited - totalSpent)
   const percent = goal > 0 ? Math.min(100, (cumulated / goal) * 100) : 0
+
   let monthsRemaining = null
   if (goal > 0 && cumulated < goal && monthlyAllocation > 0) {
     monthsRemaining = Math.ceil((goal - cumulated) / monthlyAllocation)
@@ -195,7 +205,7 @@ export function computeSavingState(settings, envelopeKey, transactions, now = ne
   return {
     key: env.key, label: env.label, icone: env.icone,
     cumulated, goal, percent, monthsRemaining, monthlyAllocation,
-    totalAllocated, totalDeposited, totalSpent,
+    totalDeposited, totalSpent,
   }
 }
 
@@ -230,86 +240,6 @@ export function computeMonthlyEnvelopeStates(settings, transactions, now = new D
   })
 }
 
-/**
- * Fond d'urgence : cumule depuis `settings.start_month` (allocation mensuelle
- * pct_urgence % du revenu, chaque mois écoulé depuis le début) moins toutes les
- * dépenses taguées 'urgence' (tout l'historique, puisque ça ne repart jamais à zéro).
- */
-export function computeEmergencyFundState(settings, allUrgenceTransactions, now = new Date()) {
-  if (!settings) {
-    return { cumulated: 0, goal: 0, percent: 0, monthsRemaining: null, monthlyAllocation: 0 }
-  }
-  const goal = Number(settings.emergency_goal) || 0
-  const monthlyAllocation = allocationFor(settings, 'urgence')
-  const start = settings.start_month ? new Date(settings.start_month) : startOfMonth(now)
-
-  const monthsElapsed = monthsBetweenInclusive(start, now)
-  const totalAllocated = monthsElapsed * monthlyAllocation
-
-  let totalDeposited = 0
-  let totalSpent = 0
-  for (const tx of allUrgenceTransactions) {
-    const amount = Number(tx.amount || 0)
-    // Un versement est enregistré en négatif (c'est la convention « Ajout »
-    // de la saisie rapide). L'additionner tel quel faisait BAISSER le fond
-    // du montant versé. On ne garde donc que sa grandeur.
-    if (isDeposit(tx)) totalDeposited += Math.abs(amount)
-    else totalSpent += amount
-  }
-
-  const cumulated = Math.max(0, totalAllocated + totalDeposited - totalSpent)
-  const percent = goal > 0 ? Math.min(100, (cumulated / goal) * 100) : 0
-
-  let monthsRemaining = null
-  if (goal > 0 && cumulated < goal && monthlyAllocation > 0) {
-    monthsRemaining = Math.ceil((goal - cumulated) / monthlyAllocation)
-  } else if (cumulated >= goal) {
-    monthsRemaining = 0
-  }
-
-  return {
-    cumulated, goal, percent, monthsRemaining, monthlyAllocation,
-    totalAllocated, totalDeposited, totalSpent,
-  }
-}
-
-/**
- * Historique mois par mois du cumul du fond d'urgence, pour la courbe de progression.
- * Simplification assumée : le % d'allocation courant s'applique aussi rétroactivement
- * (settings n'a pas d'historique de versions).
- */
-export function computeEmergencyFundHistory(settings, allUrgenceTransactions, monthsToShow = 12, now = new Date()) {
-  if (!settings) return []
-  const start = settings.start_month ? new Date(settings.start_month) : startOfMonth(now)
-  const monthlyAllocation = allocationFor(settings, 'urgence')
-  const totalMonths = monthsBetweenInclusive(start, now)
-  const firstShown = Math.max(1, totalMonths - monthsToShow + 1)
-
-  const history = []
-  for (let m = firstShown; m <= totalMonths; m++) {
-    const cursor = clampToMonth(start.getFullYear(), start.getMonth() + m - 1, SALARY_DAY)
-    const nextCursor = clampToMonth(start.getFullYear(), start.getMonth() + m, SALARY_DAY)
-    const allocatedSoFar = m * monthlyAllocation
-    let depositedSoFar = 0
-    let spentSoFar = 0
-    for (const tx of allUrgenceTransactions) {
-      if (new Date(tx[TX_COLS.occurredAt]) >= nextCursor) continue
-      const amount = Number(tx.amount || 0)
-      if (isDeposit(tx)) depositedSoFar += Math.abs(amount)
-      else spentSoFar += amount
-    }
-    history.push({
-      month: cursor,
-      cumulated: Math.max(0, allocatedSoFar + depositedSoFar - spentSoFar),
-    })
-  }
-  return history
-}
-
-/**
- * Série mensuelle des dépenses par enveloppe sur les `monthsToShow` derniers mois
- * (le mois en cours inclus), pour les graphiques de tendance / budget vs réel.
- */
 export function computeMonthlySeries(transactions, monthsToShow = 6, now = new Date()) {
   const months = []
   for (let i = monthsToShow - 1; i >= 0; i--) {

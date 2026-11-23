@@ -54,9 +54,9 @@ export default function EnvelopeCard({ state, onAction }) {
     : `restant sur ${formatDH(state.allocated)}`
 
   const lignes = epargne
-    ? [['Mis de côté', formatDH(state.totalAllocated)],
-       ['Versements', state.totalDeposited > 0 ? `+ ${formatDH(state.totalDeposited)}` : '—'],
-       ['Retraits', state.totalSpent > 0 ? `− ${formatDH(state.totalSpent)}` : '—']]
+    ? [['Versé', state.totalDeposited > 0 ? formatDH(state.totalDeposited) : '—'],
+       ['Retiré', state.totalSpent > 0 ? `− ${formatDH(state.totalSpent)}` : '—'],
+       ['Prévu / mois', state.monthlyAllocation > 0 ? formatDH(state.monthlyAllocation) : '—']]
     : [['Alloué', formatDH(state.allocated)],
        ['Dépensé', formatDH(state.spent)],
        ['Restant', formatDH(state.remaining)]]
@@ -84,8 +84,11 @@ export default function EnvelopeCard({ state, onAction }) {
             <span className="saving__eta">
               {state.monthsRemaining === 0
                 ? 'Objectif atteint.'
-                : `Atteint dans ${state.monthsRemaining} mois à ce rythme.`}
+                : `${state.monthsRemaining} mois au rythme prévu.`}
             </span>
+          )}
+          {epargne && state.goal > 0 && state.monthsRemaining == null && (
+            <span className="saving__eta">Fixe un montant mensuel dans Réglages.</span>
           )}
           {depasse && <span className="saving__eta">Budget dépassé.</span>}
         </span>
