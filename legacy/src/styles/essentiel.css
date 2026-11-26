@@ -52,3 +52,21 @@
   display: block; font-style: normal;
   font-size: 0.74rem; color: var(--color-muted);
 }
+
+/* Navigation entre les jours : cocher ce qu'on a fait hier soir sans
+   écran sous la main. On recule, on ne devance pas. */
+.jour-nav { display: flex; align-items: center; gap: 0.35rem; }
+.jour-nav__titre { flex: 1; min-width: 0; }
+.jour-nav__btn {
+  flex: none; width: 34px; height: 34px;
+  border: 1px solid var(--color-border); border-radius: 50%;
+  background: var(--color-surface); color: var(--color-text);
+  font-size: 1.25rem; line-height: 1; cursor: pointer;
+}
+.jour-nav__btn:disabled { opacity: 0.3; cursor: default; }
+.jour-nav__retour {
+  margin-top: 0.4rem; padding: 0.3rem 0.7rem;
+  border: 0; border-radius: 999px;
+  background: #16653418; color: #166534;
+  font: inherit; font-size: 0.74rem; font-weight: 700; cursor: pointer;
+}

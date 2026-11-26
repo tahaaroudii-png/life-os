@@ -29,6 +29,9 @@ const STREAK_WINDOW_DAYS = 120
 // planifiées à des dates futures (préview en bas de page).
 const UPCOMING_WINDOW_DAYS = 30
 
+// Jusqu'où l'on peut remonter pour cocher après coup.
+const RATTRAPAGE_JOURS = 7
+
 export default function Aujourdhui() {
   // `today` doit RESTER SYNCHRO avec la vraie date locale — sinon un onglet
   // ouvert de nuit continue d'afficher les oneoffs d'hier après minuit.
@@ -40,6 +43,21 @@ export default function Aujourdhui() {
     }, 60_000)
     return () => clearInterval(id)
   }, [today])
+
+  /*
+   * Le jour affiché.
+   *
+   * Une journée ne se termine pas toujours devant l'écran : on se couche
+   * sans avoir coché, et le lendemain les tâches faites restent barrées de
+   * rouge sans moyen de les reprendre. On peut donc remonter jusqu'à une
+   * semaine en arrière et cocher là-bas. Pas en avant : cocher d'avance
+   * une tâche qu'on n'a pas faite viderait le suivi de son sens.
+   */
+  const [jour, setJour] = useState(() => todayKey())
+  useEffect(() => { setJour(today) }, [today])
+
+  const reculable = jour > addDays(today, -RATTRAPAGE_JOURS)
+  const avancable = jour < today
 
   const { tasks, isLoading: tasksLoading, createTask, updateTask, deleteTask, backfillHabit } = useTasks()
   // On fetch une fenêtre large (streak passé + preview futur) pour couvrir
@@ -56,14 +74,14 @@ export default function Aujourdhui() {
     const map = {}
     for (const l of logs) {
       const logDateKey = String(l.log_date).slice(0, 10)
-      if (logDateKey === today) map[l.task_id] = l
+      if (logDateKey === jour) map[l.task_id] = l
     }
     return map
-  }, [logs, today])
+  }, [logs, jour])
 
   const dayItems = useMemo(
-    () => buildDayTasks(tasks, logsByTaskId, today),
-    [tasks, logsByTaskId, today]
+    () => buildDayTasks(tasks, logsByTaskId, jour),
+    [tasks, logsByTaskId, jour]
   )
 
   const byAxis = useMemo(() => groupByAxis(dayItems), [dayItems])
@@ -157,7 +175,7 @@ export default function Aujourdhui() {
       if (payload.type === 'oneoff') {
         // Le log_date colle à la date choisie dans le modal (par défaut : today,
         // sinon la date future sélectionnée par l'utilisateur).
-        const targetDate = payload.oneoff_date || today
+        const targetDate = payload.oneoff_date || jour
         await upsertLog.mutateAsync({
           task_id: task.id,
           log_date: targetDate,
@@ -217,8 +235,31 @@ export default function Aujourdhui() {
 
       <header className="today-header">
         <div className="today-header__intro">
-          <h1 className="today-header__title">Aujourd'hui</h1>
-          <p className="today-header__date">{formatDateFR(new Date())}</p>
+          <div className="jour-nav">
+            <button
+              type="button" className="jour-nav__btn"
+              onClick={() => setJour(addDays(jour, -1))}
+              disabled={!reculable}
+              aria-label="Jour précédent"
+            >‹</button>
+            <div className="jour-nav__titre">
+              <h1 className="today-header__title">
+                {jour === today ? "Aujourd'hui" : jour === addDays(today, -1) ? 'Hier' : formatDateFR(new Date(`${jour}T12:00:00`))}
+              </h1>
+              <p className="today-header__date">{formatDateFR(new Date(`${jour}T12:00:00`))}</p>
+            </div>
+            <button
+              type="button" className="jour-nav__btn"
+              onClick={() => setJour(addDays(jour, 1))}
+              disabled={!avancable}
+              aria-label="Jour suivant"
+            >›</button>
+          </div>
+          {jour !== today && (
+            <button type="button" className="jour-nav__retour" onClick={() => setJour(today)}>
+              Revenir à aujourd'hui
+            </button>
+          )}
         </div>
         <div className="today-header__stats">
           <div className="today-header__pct">{Math.round(rate * 100)}<span>%</span></div>
@@ -292,7 +333,7 @@ export default function Aujourdhui() {
             <TaskLine
               key={it.task.id}
               item={it}
-              dateKey={today}
+              dateKey={jour}
               onToggle={handleToggle}
               onDelete={it.task.type === 'oneoff' ? handleDeleteOneoff : undefined}
               onPostpone={it.task.type === 'oneoff' ? setPostponeItem : undefined}
@@ -312,7 +353,7 @@ export default function Aujourdhui() {
               <TaskLine
                 key={it.task.id}
                 item={it}
-                dateKey={today}
+                dateKey={jour}
                 onToggle={handleToggle}
                 onDelete={it.task.type === 'oneoff' ? handleDeleteOneoff : undefined}
                 onPostpone={it.task.type === 'oneoff' ? setPostponeItem : undefined}
