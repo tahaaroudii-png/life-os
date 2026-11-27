@@ -2,14 +2,30 @@
  * Choix décisif — le cadre de décision.
  * Le verdict domine l'écran ; le score est secondaire, volontairement.
  *
- * Les surfaces teintées portent TOUJOURS leur propre couleur de texte :
- * un fond clair en dur avec un texte qui suit le thème, c'est du blanc
- * sur blanc dès que l'app passe en sombre. Et le thème se règle ici de
- * deux façons — la préférence du système et data-theme — donc les deux
- * sont déclarées.
+ * Le reste de l'app est en clair, quel que soit le réglage du téléphone
+ * (index.css fixe le fond et le texte, et `color-scheme: light`). Mais les
+ * jetons --ds-* passent en sombre dès que le système est en mode sombre :
+ * sur un téléphone réglé ainsi, les cartes de cette page devenaient
+ * anthracite sous un texte resté foncé — illisible, alors que l'ordinateur,
+ * en clair, affichait tout correctement. La page fige donc ses propres
+ * jetons sur les valeurs claires, comme le reste de l'app.
  * ----------------------------------------------------------------- */
 
-:root {
+.page-choix {
+  color-scheme: light;
+  color: var(--color-text);
+
+  --ds-card: #ffffff;
+  --ds-card-alt: #f5f6f8;
+  --ds-border: #e5e7eb;
+  --ds-border-strong: #d1d5db;
+  --ds-text: #111827;
+  --ds-text-soft: #4b5563;
+  --ds-muted: #6b7280;
+  --ds-accent: #6366f1;
+  --state-good: #10b981;
+  --state-crit: #ef4444;
+
   --choix-danger-bg: #fef2f2;
   --choix-danger-line: #fecaca;
   --choix-danger-fg: #991b1b;
@@ -21,36 +37,6 @@
   --choix-warn-bg: #fffbeb;
   --choix-warn-line: #fde68a;
   --choix-warn-fg: #92400e;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --choix-danger-bg: #2a1414;
-    --choix-danger-line: #7f1d1d;
-    --choix-danger-fg: #fca5a5;
-
-    --choix-ok-bg: #0c2a1f;
-    --choix-ok-line: #065f46;
-    --choix-ok-fg: #6ee7b7;
-
-    --choix-warn-bg: #2a2110;
-    --choix-warn-line: #78350f;
-    --choix-warn-fg: #fcd34d;
-  }
-}
-
-:root[data-theme='dark'] {
-  --choix-danger-bg: #2a1414;
-  --choix-danger-line: #7f1d1d;
-  --choix-danger-fg: #fca5a5;
-
-  --choix-ok-bg: #0c2a1f;
-  --choix-ok-line: #065f46;
-  --choix-ok-fg: #6ee7b7;
-
-  --choix-warn-bg: #2a2110;
-  --choix-warn-line: #78350f;
-  --choix-warn-fg: #fcd34d;
 }
 
 .page-choix {
