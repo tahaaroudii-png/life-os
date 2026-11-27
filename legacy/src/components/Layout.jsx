@@ -37,22 +37,31 @@ const ECOM_NAV = [
   { to: '/ecom/reglages',   label: 'Réglages',   icon: '⚙️' },
 ]
 
+const CHOIX_NAV = [
+  { to: '/choix', label: 'Dossiers', icon: '⚖️' },
+]
+
+// Libellé neutre volontairement : l'écran est privé et le téléphone est
+// souvent sous les yeux de la famille. Les prénoms n'apparaissent qu'une
+// fois la section ouverte.
 const SECTIONS = [
   { key: 'budget',   icon: '💰', label: 'Budget',     root: '/',          nav: BUDGET_NAV },
   { key: 'planning', icon: '✅', label: 'Planning',   root: '/planning',  nav: PLANNING_NAV },
   { key: 'oncf',     icon: '🚂', label: 'ONCF',       root: '/oncf',      nav: ONCF_NAV },
   { key: 'ecom',     icon: '🛒', label: 'E-commerce', root: '/ecom',      nav: ECOM_NAV },
+  { key: 'choix',    icon: '⚖️', label: 'Décisions',  root: '/choix',     nav: CHOIX_NAV },
 ]
 
 function detectSection(pathname) {
   if (pathname.startsWith('/planning')) return SECTIONS[1]
   if (pathname.startsWith('/oncf'))     return SECTIONS[2]
   if (pathname.startsWith('/ecom'))     return SECTIONS[3]
+  if (pathname.startsWith('/choix'))    return SECTIONS[4]
   return SECTIONS[0]
 }
 
 // Routes qui doivent matcher "end" pour l'état actif (racines de chaque section).
-const END_ROUTES = new Set(['/', '/planning', '/oncf', '/ecom'])
+const END_ROUTES = new Set(['/', '/planning', '/oncf', '/ecom', '/choix'])
 
 export default function Layout() {
   const { signOut } = useAuth()

@@ -8,6 +8,7 @@
   --orb-oncf:     #f97316;
   --orb-ecom:     #8b5cf6;
   --orb-goals:    #f59e0b;
+  --orb-choix:    #64748b;
 }
 
 .orbs {
@@ -43,6 +44,7 @@
 .orb--oncf     { --orb-color: var(--orb-oncf); }
 .orb--ecom     { --orb-color: var(--orb-ecom); }
 .orb--goals    { --orb-color: var(--orb-goals); }
+.orb--choix    { --orb-color: var(--orb-choix); }
 
 .orb-halo,
 .orb-ring {

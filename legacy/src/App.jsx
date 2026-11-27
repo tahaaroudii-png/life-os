@@ -18,6 +18,7 @@ import EcomProduits from './pages/ecom/EcomProduits'
 import EcomMedia from './pages/ecom/EcomMedia'
 import EcomStock from './pages/ecom/EcomStock'
 import EcomSoir from './pages/ecom/EcomSoir'
+import ChoixDecisif from './pages/mariage/ChoixDecisif'
 import Aide from './pages/Aide'
 
 export default function App() {
@@ -60,6 +61,8 @@ export default function App() {
           <Route path="/ecom/mouvements" element={<EcomMouvements />} />
           <Route path="/ecom/reglages" element={<EcomReglages />} />
           {/* Objectifs 2026 */}
+          {/* Choix décisif */}
+          <Route path="/choix" element={<ChoixDecisif />} />
           {/* Aide */}
           <Route path="/aide" element={<Aide />} />
           <Route path="*" element={<Navigate to="/" replace />} />
