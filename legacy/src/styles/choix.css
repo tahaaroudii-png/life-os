@@ -1,7 +1,57 @@
 /* -----------------------------------------------------------------
  * Choix décisif — le cadre de décision.
  * Le verdict domine l'écran ; le score est secondaire, volontairement.
+ *
+ * Les surfaces teintées portent TOUJOURS leur propre couleur de texte :
+ * un fond clair en dur avec un texte qui suit le thème, c'est du blanc
+ * sur blanc dès que l'app passe en sombre. Et le thème se règle ici de
+ * deux façons — la préférence du système et data-theme — donc les deux
+ * sont déclarées.
  * ----------------------------------------------------------------- */
+
+:root {
+  --choix-danger-bg: #fef2f2;
+  --choix-danger-line: #fecaca;
+  --choix-danger-fg: #991b1b;
+
+  --choix-ok-bg: #f0fdf4;
+  --choix-ok-line: #bbf7d0;
+  --choix-ok-fg: #065f46;
+
+  --choix-warn-bg: #fffbeb;
+  --choix-warn-line: #fde68a;
+  --choix-warn-fg: #92400e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --choix-danger-bg: #2a1414;
+    --choix-danger-line: #7f1d1d;
+    --choix-danger-fg: #fca5a5;
+
+    --choix-ok-bg: #0c2a1f;
+    --choix-ok-line: #065f46;
+    --choix-ok-fg: #6ee7b7;
+
+    --choix-warn-bg: #2a2110;
+    --choix-warn-line: #78350f;
+    --choix-warn-fg: #fcd34d;
+  }
+}
+
+:root[data-theme='dark'] {
+  --choix-danger-bg: #2a1414;
+  --choix-danger-line: #7f1d1d;
+  --choix-danger-fg: #fca5a5;
+
+  --choix-ok-bg: #0c2a1f;
+  --choix-ok-line: #065f46;
+  --choix-ok-fg: #6ee7b7;
+
+  --choix-warn-bg: #2a2110;
+  --choix-warn-line: #78350f;
+  --choix-warn-fg: #fcd34d;
+}
 
 .page-choix {
   padding: 0 0 5rem;
@@ -75,9 +125,9 @@
   white-space: nowrap;
 }
 
-.choix-verdict--danger { background: #fee2e2; color: #991b1b; }
-.choix-verdict--ok     { background: #d1fae5; color: #065f46; }
-.choix-verdict--warn   { background: #fef3c7; color: #92400e; }
+.choix-verdict--danger { background: var(--choix-danger-bg); color: var(--choix-danger-fg); }
+.choix-verdict--ok     { background: var(--choix-ok-bg);     color: var(--choix-ok-fg); }
+.choix-verdict--warn   { background: var(--choix-warn-bg);   color: var(--choix-warn-fg); }
 
 .choix-hero {
   padding: 1.1rem 1.2rem;
@@ -86,9 +136,28 @@
   margin-bottom: 1rem;
 }
 
-.choix-hero--danger { background: #fef2f2; border-color: #fecaca; }
-.choix-hero--ok     { background: #f0fdf4; border-color: #bbf7d0; }
-.choix-hero--warn   { background: #fffbeb; border-color: #fde68a; }
+.choix-hero--danger {
+  background: var(--choix-danger-bg);
+  border-color: var(--choix-danger-line);
+  color: var(--choix-danger-fg);
+}
+
+.choix-hero--ok {
+  background: var(--choix-ok-bg);
+  border-color: var(--choix-ok-line);
+  color: var(--choix-ok-fg);
+}
+
+.choix-hero--warn {
+  background: var(--choix-warn-bg);
+  border-color: var(--choix-warn-line);
+  color: var(--choix-warn-fg);
+}
+
+/* Le score reste lisible même sur une teinte : il ne prend pas la couleur
+   du verdict, qui serait trop pâle pour un chiffre de cette taille. */
+.choix-hero__score { color: var(--ds-text); }
+.choix-hero__score .muted { color: var(--ds-muted); }
 
 .choix-hero__verdict {
   font-size: 0.95rem;
@@ -126,7 +195,7 @@
   margin: 0 0 0.1rem;
 }
 
-.choix-section--danger h2 { color: #991b1b; }
+.choix-section--danger h2 { color: var(--choix-danger-fg); }
 
 .choix-criteria {
   list-style: none;
@@ -241,9 +310,20 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.9rem;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: var(--choix-danger-bg);
+  border: 1px solid var(--choix-danger-line);
   border-radius: var(--r-sm);
+  color: var(--choix-danger-fg);
+}
+
+.choix-confirm button:not(.btn-danger) {
+  background: var(--ds-card);
+  border: 1px solid var(--ds-border-strong);
+  border-radius: var(--r-sm);
+  padding: 0.5rem 0.9rem;
+  color: var(--ds-text);
+  font: inherit;
+  cursor: pointer;
 }
 
 .choix-confirm p {
@@ -263,16 +343,19 @@
   cursor: pointer;
 }
 
-@media (prefers-color-scheme: dark) {
-  .choix-verdict--danger { background: #4c1d1d; color: #fecaca; }
-  .choix-verdict--ok     { background: #064e3b; color: #a7f3d0; }
-  .choix-verdict--warn   { background: #4a3410; color: #fde68a; }
+/* Les champs de saisie suivent le thème : sans couleur explicite, le
+   navigateur garde son texte noir sur la carte sombre. */
+.choix-add input,
+.choix-notes {
+  background: var(--ds-card);
+  border: 1px solid var(--ds-border-strong);
+  border-radius: var(--r-sm);
+  padding: 0.55rem 0.75rem;
+  color: var(--ds-text);
+  font: inherit;
+}
 
-  .choix-hero--danger { background: #2a1414; border-color: #7f1d1d; }
-  .choix-hero--ok     { background: #0c2a1f; border-color: #065f46; }
-  .choix-hero--warn   { background: #2a2110; border-color: #78350f; }
-
-  .choix-section--danger h2 { color: #fca5a5; }
-
-  .choix-confirm { background: #2a1414; border-color: #7f1d1d; }
+.choix-add input::placeholder,
+.choix-notes::placeholder {
+  color: var(--ds-muted);
 }
